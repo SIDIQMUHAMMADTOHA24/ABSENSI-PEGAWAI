@@ -1,239 +1,389 @@
-import 'dart:async';
+import 'package:absensi_pegawai/bloc/attendance/attendance_bloc.dart';
+import 'package:absensi_pegawai/repository/attendance_repository.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:geolocator/geolocator.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
-class DashboardView extends StatefulWidget {
+class DashboardView extends StatelessWidget {
   const DashboardView({super.key});
-
-  @override
-  State<DashboardView> createState() => _DashboardViewState();
-}
-
-class _DashboardViewState extends State<DashboardView> {
-  // ====== Konfigurasi kantor ====== -7.688360, 110.187415
-  static const double officeLat = -7.688360; // ganti sesuai lokasi kantor
-  static const double officeLon = 110.187415; // ganti sesuai lokasi kantor
-  static const double officeRadiusM = 100; // meter
-
-  // ====== State lokasi & status ======
-  double? _curLat;
-  double? _curLon;
-  double? _distanceM; // jarak user ke titik kantor dalam meter
-  bool _inside = false;
-
-  // ====== State absensi ======
-  DateTime? _checkInAt;
-  DateTime? _checkOutAt;
-
-  StreamSubscription<Position>? _posSub;
-  bool _locationReady = false;
-  bool _loadingPrefs = true;
-
-  @override
-  void initState() {
-    super.initState();
-    _init();
-  }
-
-  @override
-  void dispose() {
-    _posSub?.cancel();
-    super.dispose();
-  }
-
-  Future<void> _init() async {
-    await _loadPrefs();
-    await _ensureLocationPermission();
-    await _startLocationStream();
-    setState(() => _locationReady = true);
-  }
-
-  Future<void> _loadPrefs() async {
-    final sp = await SharedPreferences.getInstance();
-    final ci = sp.getString('checkInAt');
-    final co = sp.getString('checkOutAt');
-    setState(() {
-      _checkInAt = ci != null ? DateTime.tryParse(ci) : null;
-      _checkOutAt = co != null ? DateTime.tryParse(co) : null;
-      _loadingPrefs = false;
-    });
-  }
-
-  Future<void> _savePrefs() async {
-    final sp = await SharedPreferences.getInstance();
-    if (_checkInAt != null) {
-      await sp.setString('checkInAt', _checkInAt!.toIso8601String());
-    } else {
-      await sp.remove('checkInAt');
-    }
-    if (_checkOutAt != null) {
-      await sp.setString('checkOutAt', _checkOutAt!.toIso8601String());
-    } else {
-      await sp.remove('checkOutAt');
-    }
-  }
-
-  Future<void> _ensureLocationPermission() async {
-    bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
-    if (!serviceEnabled) {
-      // Minta user nyalakan GPS
-      await Geolocator.openLocationSettings();
-    }
-
-    LocationPermission permission = await Geolocator.checkPermission();
-    if (permission == LocationPermission.denied) {
-      permission = await Geolocator.requestPermission();
-    }
-    if (permission == LocationPermission.deniedForever) {
-      // Arahkan user ke settings app
-      await Geolocator.openAppSettings();
-    }
-  }
-
-  Future<void> _startLocationStream() async {
-    // Ambil posisi awal
-    final pos = await Geolocator.getCurrentPosition(
-      desiredAccuracy: LocationAccuracy.high,
-    );
-    _handlePosition(pos);
-
-    // Dengarkan perubahan posisi (hemat baterai: distanceFilter beberapa meter)
-    _posSub?.cancel();
-    _posSub = Geolocator.getPositionStream(
-      locationSettings: const LocationSettings(
-        accuracy: LocationAccuracy.high,
-        distanceFilter: 5,
-      ),
-    ).listen(_handlePosition);
-  }
-
-  void _handlePosition(Position p) {
-    final d = Geolocator.distanceBetween(
-      p.latitude,
-      p.longitude,
-      officeLat,
-      officeLon,
-    ); // meter
-    setState(() {
-      _curLat = p.latitude;
-      _curLon = p.longitude;
-      _distanceM = d;
-      _inside = d <= officeRadiusM;
-    });
-  }
-
-  Future<void> _onCheckIn() async {
-    if (!_inside) return;
-    if (_checkInAt != null) return; // sudah check-in
-    setState(() {
-      _checkInAt = DateTime.now();
-      _checkOutAt = null; // reset checkout
-    });
-    await _savePrefs();
-    _snack('Berhasil check-in');
-  }
-
-  Future<void> _onCheckOut() async {
-    if (_checkInAt == null) return; // belum check-in
-    if (_checkOutAt != null) return; // sudah check-out
-    setState(() {
-      _checkOutAt = DateTime.now();
-    });
-    await _savePrefs();
-    _snack('Berhasil check-out');
-  }
-
-  void _snack(String msg) {
-    if (!mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
-  }
 
   String _fmt(DateTime? dt) {
     if (dt == null) return '—';
-    // Format ringkas lokal (tanpa paket tambahan)
-    final d = dt;
     two(int n) => n.toString().padLeft(2, '0');
+    final d = dt;
     return '${d.year}-${two(d.month)}-${two(d.day)} ${two(d.hour)}:${two(d.minute)}:${two(d.second)}';
+  }
+
+  String _time(DateTime? dt) {
+    if (dt == null) return '—';
+    String two(int n) => n.toString().padLeft(2, '0');
+    return "${two(dt.hour)}:${two(dt.minute)}";
   }
 
   @override
   Widget build(BuildContext context) {
-    final padTop = MediaQuery.paddingOf(context).top;
-    final canCheckIn = _inside && _checkInAt == null;
-    final canCheckOut = _checkInAt != null && _checkOutAt == null;
-
     return Scaffold(
-      appBar: AppBar(title: const Text('Absensi Radius'), centerTitle: true),
-      body: Center(
-        child: SingleChildScrollView(
-          padding: EdgeInsets.fromLTRB(16, padTop + 16, 16, 24),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              if (_loadingPrefs || !_locationReady)
-                const CircularProgressIndicator(),
-              if (!_loadingPrefs && _locationReady) ...[
-                Text("Check In Pada : ${_fmt(_checkInAt)}"),
-                const SizedBox(height: 12),
-                Text("Check Out Pada : ${_fmt(_checkOutAt)}"),
-                const SizedBox(height: 16),
-                const Text("Lokasi Anda:"),
-                const SizedBox(height: 4),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text("Lat : ${_curLat?.toStringAsFixed(6) ?? '—'}"),
-                    const SizedBox(width: 12),
-                    Text("Long : ${_curLon?.toStringAsFixed(6) ?? '—'}"),
-                  ],
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  "Jarak ke kantor: ${_distanceM != null ? '${_distanceM!.toStringAsFixed(1)} m' : '—'}",
-                ),
-                const SizedBox(height: 4),
-                Chip(
-                  label: Text(
-                    _inside
-                        ? "Di dalam area (≤ ${officeRadiusM.toInt()} m)"
-                        : "Di luar area",
+      backgroundColor: Color(0xff10122a),
+      body: BlocConsumer<AttendanceBloc, AttendanceState>(
+        listenWhen: (p, c) => c.toast != null,
+        listener: (context, state) {
+          final msg = state.toast!;
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text(msg)));
+        },
+        builder: (context, state) {
+          final bloc = context.read<AttendanceBloc>();
+          final canCheckIn = state.inside && state.checkInAt == null;
+          final canCheckOut =
+              state.inside &&
+              state.checkInAt != null &&
+              state.checkOutAt == null;
+
+          return Padding(
+            padding: EdgeInsets.symmetric(
+              vertical: MediaQuery.paddingOf(context).top,
+            ),
+            child: CustomScrollView(
+              slivers: [
+                SliverToBoxAdapter(
+                  child: Center(
+                    child: Text(
+                      "PT Nikel Prima Gemilang",
+                      style: TextStyle(
+                        color: Color(0xffE5E7EB),
+                        fontSize: 24,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
                   ),
-                  backgroundColor: _inside
-                      ? Colors.green.shade100
-                      : Colors.red.shade100,
                 ),
-                const SizedBox(height: 20),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    ElevatedButton(
-                      onPressed: canCheckIn ? _onCheckIn : null,
-                      child: const Text("Check In"),
-                    ),
-                    const SizedBox(width: 20),
-                    ElevatedButton(
-                      onPressed: canCheckOut ? _onCheckOut : null,
-                      child: const Text("Check Out"),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 24),
-                const Text("Lokasi Kantor:"),
-                const SizedBox(height: 4),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text("Lat : ${officeLat.toStringAsFixed(6)}"),
-                    const SizedBox(width: 12),
-                    Text("Long : ${officeLon.toStringAsFixed(6)}"),
-                  ],
-                ),
-                const SizedBox(height: 8),
-                Text("Radius: ${officeRadiusM.toStringAsFixed(0)} m"),
+                // ==== ACTION CHIP ====
+                chipActionWidget(state, canCheckIn, bloc, canCheckOut),
+
+                // ==== LOCATION CHIP ====
+                chipLocationWidget(state),
               ],
-            ],
+            ),
+          );
+        },
+      ),
+      bottomNavigationBar: BottomNavigationBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        type: BottomNavigationBarType.fixed,
+
+        items: [
+          BottomNavigationBarItem(
+            icon: Icon(CupertinoIcons.home),
+            label: 'Home',
           ),
+          BottomNavigationBarItem(
+            icon: Icon(CupertinoIcons.calendar),
+            label: 'Calender',
+          ),
+        ],
+      ),
+    );
+  }
+
+  SliverToBoxAdapter chipActionWidget(
+    AttendanceState state,
+    bool canCheckIn,
+    AttendanceBloc bloc,
+    bool canCheckOut,
+  ) {
+    return SliverToBoxAdapter(
+      child: Container(
+        padding: const EdgeInsets.all(20),
+        margin: const EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(20),
+          gradient: const LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [Color(0xff252745), Color(0xff483477)],
+          ),
+        ),
+        child: Column(
+          children: [
+            Row(
+              children: [
+                CircleAvatar(
+                  backgroundColor: Color(0xff392d62),
+                  child: Container(
+                    width: 20,
+                    height: 20,
+                    padding: EdgeInsets.all(3),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(100),
+                      border: Border.all(color: Color(0xffE5E7EB), width: 2),
+                    ),
+                    child: CircleAvatar(backgroundColor: Color(0xffE5E7EB)),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      "Status",
+                      style: TextStyle(color: Color(0xff9CA3AF), fontSize: 16),
+                    ),
+                    Text(
+                      state.inside ? "Di dalam area" : "Di luar area",
+                      style: const TextStyle(
+                        color: Color(0xffE5E7EB),
+                        fontSize: 18,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+            Container(
+              padding: const EdgeInsets.all(16),
+              margin: const EdgeInsets.only(top: 12),
+              decoration: BoxDecoration(
+                border: Border.all(
+                  color: const Color.fromARGB(23, 229, 231, 235),
+                ),
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: const [
+                      Text(
+                        "Hari ini",
+                        style: TextStyle(
+                          color: Color(0xff9CA3AF),
+                          fontSize: 14,
+                        ),
+                      ),
+                      Text(
+                        "Radius 20 m",
+                        style: TextStyle(
+                          color: Color(0xff9CA3AF),
+                          fontSize: 12,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    // contoh tanggal (silakan ganti dengan intl DateFormat)
+                    _fmt(DateTime.now()).split(' ').first,
+                    style: const TextStyle(
+                      color: Color(0xffE5E7EB),
+                      fontSize: 18,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        "- ${_time(state.checkInAt)}",
+                        style: const TextStyle(
+                          color: Color(0xff9CA3AF),
+                          fontSize: 16,
+                        ),
+                      ),
+                      Text(
+                        "- ${_time(state.checkOutAt)}",
+                        style: const TextStyle(
+                          color: Color(0xff9CA3AF),
+                          fontSize: 16,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 12),
+            const Text(
+              "Pastikan Anda berada didalam radius kantor untuk melakukan Check In/Out",
+              style: TextStyle(color: Color(0xffE5E7EB), fontSize: 16),
+            ),
+            const SizedBox(height: 12),
+            Row(
+              children: [
+                Expanded(
+                  child: Opacity(
+                    opacity: canCheckIn ? 1 : .5,
+                    child: GestureDetector(
+                      onTap: canCheckIn
+                          ? () {
+                              print('can check in');
+                              bloc.add(CheckInPressed());
+                            }
+                          : null,
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(8),
+                          color: (state.checkInAt == null)
+                              ? const Color(0xff343c60)
+                              : Color(0xff1e213a),
+                        ),
+                        alignment: Alignment.center,
+                        child: const Text(
+                          "Check In",
+                          style: TextStyle(
+                            color: Color(0xffE5E7EB),
+                            fontSize: 16,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 20),
+                Expanded(
+                  child: Opacity(
+                    opacity: canCheckOut ? 1 : .5,
+                    child: GestureDetector(
+                      onTap: canCheckOut
+                          ? () {
+                              bloc.add(CheckOutPressed());
+                            }
+                          : null,
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(8),
+                          color:
+                              (state.checkInAt != null &&
+                                  state.checkOutAt == null)
+                              ? const Color(0xff343c60)
+                              : const Color(0xff1e213a),
+                        ),
+                        alignment: Alignment.center,
+                        child: const Text(
+                          "Check Out",
+                          style: TextStyle(
+                            color: Color(0xffE5E7EB),
+                            fontSize: 16,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  SliverToBoxAdapter chipLocationWidget(AttendanceState state) {
+    return SliverToBoxAdapter(
+      child: Container(
+        padding: const EdgeInsets.all(20),
+        margin: const EdgeInsets.symmetric(horizontal: 20),
+        decoration: BoxDecoration(
+          color: const Color(0xff232544),
+          borderRadius: BorderRadius.circular(20),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              "Lokasi Anda",
+              style: TextStyle(color: Color(0xff9CA3AF), fontSize: 16),
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  "Lat: ${state.lat?.toStringAsFixed(6) ?? '—'}",
+                  style: const TextStyle(
+                    color: Color(0xffE5E7EB),
+                    fontSize: 18,
+                  ),
+                ),
+                Text(
+                  "Long: ${state.lon?.toStringAsFixed(6) ?? '—'}",
+                  style: const TextStyle(
+                    color: Color(0xffE5E7EB),
+                    fontSize: 18,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 4),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Text(
+                  "Jarak ke Kantor:",
+                  style: TextStyle(color: Color(0xff9CA3AF), fontSize: 14),
+                ),
+                Text(
+                  state.distanceM != null
+                      ? "${state.distanceM!.toStringAsFixed(1)} m"
+                      : "—",
+                  style: const TextStyle(
+                    color: Color(0xff9CA3AF),
+                    fontSize: 14,
+                  ),
+                ),
+              ],
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                Container(
+                  margin: const EdgeInsets.symmetric(vertical: 8),
+                  padding: const EdgeInsets.symmetric(
+                    vertical: 8,
+                    horizontal: 12,
+                  ),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(100),
+                    color: state.inside
+                        ? const Color(0xFF10B981)
+                        : const Color(0xFFEF4444),
+                  ),
+                  child: Text(
+                    state.inside ? "Di dalam area" : "Di luar area",
+                    style: const TextStyle(
+                      color: Color(0xffE5E7EB),
+                      fontSize: 14,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const Divider(color: Color.fromARGB(23, 229, 231, 235)),
+            const SizedBox(height: 4),
+            const Text(
+              "Lokasi Kantor",
+              style: TextStyle(color: Color(0xff9CA3AF), fontSize: 16),
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  "Lat: ${AttendanceRepository.officeLat}",
+                  style: TextStyle(color: Color(0xffE5E7EB), fontSize: 18),
+                ),
+                Text(
+                  "Long: ${AttendanceRepository.officeLon}",
+                  style: TextStyle(color: Color(0xffE5E7EB), fontSize: 18),
+                ),
+              ],
+            ),
+          ],
         ),
       ),
     );
