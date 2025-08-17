@@ -5,7 +5,6 @@ sealed class AttendanceEvent {}
 class AppStarted extends AttendanceEvent {} // load prefs + izin + stream
 
 class PositionUpdated extends AttendanceEvent {
-  // dari stream
   final Position pos;
   PositionUpdated(this.pos);
 }

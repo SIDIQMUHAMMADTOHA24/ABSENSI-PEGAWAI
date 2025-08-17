@@ -1,6 +1,5 @@
 import 'package:absensi_pegawai/bloc/attendance/attendance_bloc.dart';
 import 'package:absensi_pegawai/repository/attendance_repository.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -22,68 +21,47 @@ class DashboardView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Color(0xff10122a),
-      body: BlocConsumer<AttendanceBloc, AttendanceState>(
-        listenWhen: (p, c) => c.toast != null,
-        listener: (context, state) {
-          final msg = state.toast!;
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(SnackBar(content: Text(msg)));
-        },
-        builder: (context, state) {
-          final bloc = context.read<AttendanceBloc>();
-          final canCheckIn = state.inside && state.checkInAt == null;
-          final canCheckOut =
-              state.inside &&
-              state.checkInAt != null &&
-              state.checkOutAt == null;
+    return BlocConsumer<AttendanceBloc, AttendanceState>(
+      listenWhen: (p, c) => c.toast != null,
+      listener: (context, state) {
+        final msg = state.toast!;
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(msg)));
+      },
+      builder: (context, state) {
+        final bloc = context.read<AttendanceBloc>();
+        final canCheckIn = state.inside && state.checkInAt == null;
+        final canCheckOut =
+            state.inside && state.checkInAt != null && state.checkOutAt == null;
 
-          return Padding(
-            padding: EdgeInsets.symmetric(
-              vertical: MediaQuery.paddingOf(context).top,
-            ),
-            child: CustomScrollView(
-              slivers: [
-                SliverToBoxAdapter(
-                  child: Center(
-                    child: Text(
-                      "PT Nikel Prima Gemilang",
-                      style: TextStyle(
-                        color: Color(0xffE5E7EB),
-                        fontSize: 24,
-                        fontWeight: FontWeight.w500,
-                      ),
+        return Padding(
+          padding: EdgeInsets.symmetric(
+            vertical: MediaQuery.paddingOf(context).top,
+          ),
+          child: CustomScrollView(
+            slivers: [
+              SliverToBoxAdapter(
+                child: Center(
+                  child: Text(
+                    "PT Nikel Prima Gemilang",
+                    style: TextStyle(
+                      color: Color(0xffE5E7EB),
+                      fontSize: 24,
+                      fontWeight: FontWeight.w500,
                     ),
                   ),
                 ),
-                // ==== ACTION CHIP ====
-                chipActionWidget(state, canCheckIn, bloc, canCheckOut),
+              ),
+              // ==== ACTION CHIP ====
+              chipActionWidget(state, canCheckIn, bloc, canCheckOut),
 
-                // ==== LOCATION CHIP ====
-                chipLocationWidget(state),
-              ],
-            ),
-          );
-        },
-      ),
-      bottomNavigationBar: BottomNavigationBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        type: BottomNavigationBarType.fixed,
-
-        items: [
-          BottomNavigationBarItem(
-            icon: Icon(CupertinoIcons.home),
-            label: 'Home',
+              // ==== LOCATION CHIP ====
+              chipLocationWidget(state),
+            ],
           ),
-          BottomNavigationBarItem(
-            icon: Icon(CupertinoIcons.calendar),
-            label: 'Calender',
-          ),
-        ],
-      ),
+        );
+      },
     );
   }
 
@@ -175,7 +153,6 @@ class DashboardView extends StatelessWidget {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    // contoh tanggal (silakan ganti dengan intl DateFormat)
                     _fmt(DateTime.now()).split(' ').first,
                     style: const TextStyle(
                       color: Color(0xffE5E7EB),

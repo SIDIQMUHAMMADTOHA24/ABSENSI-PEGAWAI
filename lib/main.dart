@@ -1,6 +1,8 @@
 import 'package:absensi_pegawai/bloc/attendance/attendance_bloc.dart';
 import 'package:absensi_pegawai/repository/attendance_repository.dart';
 import 'package:absensi_pegawai/views/dashboard_view.dart';
+import 'package:absensi_pegawai/views/login_view.dart';
+import 'package:absensi_pegawai/views/widgets/bottom_nav_bar_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -27,7 +29,7 @@ class MyApp extends StatelessWidget {
         theme: ThemeData(
           colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         ),
-        home: DashboardView(),
+        home: LoginView(),
       ),
     );
   }
