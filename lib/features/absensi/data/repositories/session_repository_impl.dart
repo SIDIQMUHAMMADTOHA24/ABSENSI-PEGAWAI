@@ -5,15 +5,16 @@ class SessionRepositoryImpl implements SessionRepository {
   final TokenStorage tokenStorage;
 
   SessionRepositoryImpl(this.tokenStorage);
+
   @override
   Future<void> deleteRefreshToken() {
-    return tokenStorage.clearRefreshToken();
+    return tokenStorage.deleteRefreshToken();
   }
 
   @override
   Future<bool> hasRefreshToken() async {
-    final token = await tokenStorage.readRefreshToken();
-    return (token ?? '').isNotEmpty;
+    String? result = await tokenStorage.readRefreshToken();
+    return (result ?? '').isNotEmpty;
   }
 
   @override

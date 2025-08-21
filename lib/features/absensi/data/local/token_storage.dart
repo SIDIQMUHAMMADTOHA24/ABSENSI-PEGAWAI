@@ -11,7 +11,7 @@ class TokenStorage {
     return _s.read(key: 'refresh_token');
   }
 
-  Future<void> clearRefreshToken() {
+  Future<void> deleteRefreshToken() {
     return _s.delete(key: 'refresh_token');
   }
 }

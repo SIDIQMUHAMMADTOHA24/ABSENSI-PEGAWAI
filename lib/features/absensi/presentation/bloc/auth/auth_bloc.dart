@@ -1,55 +1,53 @@
+import 'package:absensi_pegawai/features/absensi/domain/entities/auth_result.dart';
+import 'package:absensi_pegawai/features/absensi/domain/usecases/session/save_refresh_token.dart';
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 
-import '../../../domain/usecases/login.dart' as uc_login;
-import '../../../domain/usecases/register.dart' as uc_register;
-import '../../../domain/usecases/save_token.dart' as uc_save_token;
+import '../../../domain/usecases/auth/login.dart';
+import '../../../domain/usecases/auth/register.dart';
 
 part 'auth_event.dart';
 part 'auth_state.dart';
 
 class AuthBloc extends Bloc<AuthEvent, AuthState> {
-  final uc_login.Login loginUc;
-  final uc_register.Register registerUc;
-  final uc_save_token.SaveToken saveTokenUc;
-
+  final Login loginUC;
+  final Register registerUC;
+  final SaveRefreshToken saveRefreshToken;
   AuthBloc({
-    required this.loginUc,
-    required this.registerUc,
-    required this.saveTokenUc,
+    required this.loginUC,
+    required this.registerUC,
+    required this.saveRefreshToken,
   }) : super(AuthInitial()) {
-    on<LoginEvent>(_login);
-    on<RegisterEvent>(_register);
+    on<LoginEvent>(_onLogin);
+    on<RegisterEvent>(_onRegister);
   }
 
-  Future<void> _login(LoginEvent event, Emitter<AuthState> emit) async {
+  Future<void> _onLogin(LoginEvent event, Emitter<AuthState> emit) async {
     emit(AuthLoading());
     try {
-      await loginUc(
-        uc_login.LoginParams(
-          username: event.username,
-          password: event.password,
-        ),
+      final result = await loginUC(
+        username: event.username,
+        password: event.password,
       );
-      emit(AuthLogIn('Asiiik, sudah masuk!'));
-    } catch (e) {
-      emit(AuthLogOut('Nice try cuy ahhah'));
+      print('result = $result');
+      await saveRefreshToken(result.refreshToken);
+      emit(AuthLogIn('Login Success'));
+    } catch (_) {
+      emit(const AuthLogOut('Login Failed'));
     }
   }
 
-  Future<void> _register(RegisterEvent event, Emitter<AuthState> emit) async {
+  Future<void> _onRegister(RegisterEvent event, Emitter<AuthState> emit) async {
     emit(AuthLoading());
     try {
-      await registerUc(
-        uc_register.RegisterParams(
-          username: event.username,
-          password: event.password,
-          jabatan: event.jabatan,
-        ),
+      await registerUC(
+        username: event.username,
+        password: event.password,
+        jabatan: event.jabatan,
       );
-      emit(AuthLogIn('Akun lu dah dibuat, coba login dah'));
-    } catch (e) {
-      emit(AuthLogOut('Coba lagi dah'));
+      emit(const AuthLogIn('Register Success'));
+    } catch (_) {
+      emit(const AuthLogOut('Register Failed'));
     }
   }
 }
