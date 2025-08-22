@@ -1,5 +1,5 @@
 abstract class SessionRepository {
-  Future<bool> hasRefreshToken();
+  Future<String?> readRefreshToken();
   Future<void> saveRefreshToken(String token);
   Future<void> deleteRefreshToken();
 }

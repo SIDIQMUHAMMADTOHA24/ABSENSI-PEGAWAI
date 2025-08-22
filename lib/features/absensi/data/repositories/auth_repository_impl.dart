@@ -20,4 +20,9 @@ class AuthRepositoryImpl implements AuthRepository {
       jabatan: jabatan,
     );
   }
+
+  @override
+  Future<void> logout(String refreshToken) {
+    return authRemoteDataSource.logout(refreshToken);
+  }
 }

@@ -1,8 +1,8 @@
 import 'package:absensi_pegawai/features/absensi/domain/repositories/session_repository.dart';
 
-class HasRefreshToken {
+class ReadRefreshToken {
   final SessionRepository repository;
 
-  HasRefreshToken(this.repository);
-  Future<bool> call() => repository.hasRefreshToken();
+  ReadRefreshToken(this.repository);
+  Future<String?> call() => repository.readRefreshToken();
 }

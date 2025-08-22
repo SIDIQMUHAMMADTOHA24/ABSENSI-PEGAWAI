@@ -3,6 +3,8 @@ import 'package:absensi_pegawai/features/absensi/presentation/pages/profile_page
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
+import '../pages/attendance_pages.dart';
+
 class BottomNavBarWidget extends StatefulWidget {
   const BottomNavBarWidget({super.key});
 
@@ -19,7 +21,7 @@ class _BottomNavBarWidgetState extends State<BottomNavBarWidget> {
       backgroundColor: Color(0xff10122a),
       body: IndexedStack(
         index: _index,
-        children: [DashboardPages(), ProfilePages()],
+        children: [DashboardPages(), AttendancePages(), ProfilePages()],
       ),
       bottomNavigationBar: Theme(
         data: Theme.of(context).copyWith(splashColor: Colors.transparent),

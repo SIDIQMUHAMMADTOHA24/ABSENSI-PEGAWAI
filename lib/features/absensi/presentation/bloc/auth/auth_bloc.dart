@@ -1,4 +1,6 @@
-import 'package:absensi_pegawai/features/absensi/domain/entities/auth_result.dart';
+import 'package:absensi_pegawai/features/absensi/domain/usecases/auth/logout.dart';
+import 'package:absensi_pegawai/features/absensi/domain/usecases/session/delete_refresh_token.dart';
+import 'package:absensi_pegawai/features/absensi/domain/usecases/session/read_refresh_token.dart';
 import 'package:absensi_pegawai/features/absensi/domain/usecases/session/save_refresh_token.dart';
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
@@ -12,14 +14,21 @@ part 'auth_state.dart';
 class AuthBloc extends Bloc<AuthEvent, AuthState> {
   final Login loginUC;
   final Register registerUC;
-  final SaveRefreshToken saveRefreshToken;
+  final Logout logoutUC;
+  final ReadRefreshToken readRefreshTokenUC;
+  final SaveRefreshToken saveRefreshTokenUC;
+  final DeleteRefreshToken deleteRefreshTokenUC;
   AuthBloc({
     required this.loginUC,
     required this.registerUC,
-    required this.saveRefreshToken,
+    required this.logoutUC,
+    required this.readRefreshTokenUC,
+    required this.saveRefreshTokenUC,
+    required this.deleteRefreshTokenUC,
   }) : super(AuthInitial()) {
     on<LoginEvent>(_onLogin);
     on<RegisterEvent>(_onRegister);
+    on<LogoutEvent>(_onLogout);
   }
 
   Future<void> _onLogin(LoginEvent event, Emitter<AuthState> emit) async {
@@ -30,7 +39,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         password: event.password,
       );
       print('result = $result');
-      await saveRefreshToken(result.refreshToken);
+      await saveRefreshTokenUC(result.refreshToken);
       emit(AuthLogIn('Login Success'));
     } catch (_) {
       emit(const AuthLogOut('Login Failed'));
@@ -48,6 +57,20 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       emit(const AuthLogIn('Register Success'));
     } catch (_) {
       emit(const AuthLogOut('Register Failed'));
+    }
+  }
+
+  Future<void> _onLogout(LogoutEvent event, Emitter<AuthState> emit) async {
+    emit(AuthLoading());
+    try {
+      String? res = await readRefreshTokenUC();
+      if (res != null) {
+        await logoutUC(res);
+        await deleteRefreshTokenUC();
+        emit(AuthLogOut("Logout"));
+      }
+    } catch (e) {
+      emit(AuthInitial());
     }
   }
 }

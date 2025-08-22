@@ -12,9 +12,8 @@ class SessionRepositoryImpl implements SessionRepository {
   }
 
   @override
-  Future<bool> hasRefreshToken() async {
-    String? result = await tokenStorage.readRefreshToken();
-    return (result ?? '').isNotEmpty;
+  Future<String?> readRefreshToken() {
+    return tokenStorage.readRefreshToken();
   }
 
   @override

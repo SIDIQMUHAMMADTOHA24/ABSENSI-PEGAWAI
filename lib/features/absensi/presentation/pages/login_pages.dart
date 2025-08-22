@@ -1,6 +1,7 @@
 import 'package:absensi_pegawai/features/absensi/presentation/bloc/auth/auth_bloc.dart';
 import 'package:absensi_pegawai/features/absensi/presentation/pages/dashboard_pages.dart';
 import 'package:absensi_pegawai/features/absensi/presentation/widgets/bottom_nav_bar_widget.dart';
+import 'package:absensi_pegawai/features/absensi/presentation/widgets/nav.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -35,11 +36,7 @@ class _LoginPagesState extends State<LoginPages> {
               context,
             ).showSnackBar(SnackBar(content: Text(state.message)));
           } else if (state is AuthLogIn) {
-            Navigator.pushAndRemoveUntil(
-              context,
-              MaterialPageRoute(builder: (context) => BottomNavBarWidget()),
-              (route) => false,
-            );
+            Nav.remove(context, BottomNavBarWidget());
           }
         },
         builder: (context, state) {

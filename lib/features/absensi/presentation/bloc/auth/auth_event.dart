@@ -33,3 +33,7 @@ class RegisterEvent extends AuthEvent {
   @override
   List<Object> get props => [username, password, jabatan];
 }
+
+class LogoutEvent extends AuthEvent {
+  const LogoutEvent();
+}
