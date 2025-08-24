@@ -3,7 +3,7 @@ import 'package:absensi_pegawai/features/absensi/domain/repositories/auth_reposi
 class Register {
   final AuthRepository authRepository;
 
-  Register({required this.authRepository});
+  Register(this.authRepository);
 
   Future<void> call({
     required String username,

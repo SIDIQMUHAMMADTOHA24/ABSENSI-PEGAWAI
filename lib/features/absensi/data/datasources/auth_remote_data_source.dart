@@ -39,7 +39,7 @@ class AuthRemoteDataSource {
     if (res.statusCode != 204) throw Exception('Register Failed');
   }
 
-  Future<AuthResultModel> refreshToken() async {
+  Future<AuthResultModel> refresh(String refreshToken) async {
     final res = await dio.post(
       '/refresh',
       data: {'refresh_token': refreshToken},

@@ -42,6 +42,9 @@ dependencies:
   intl: ^0.20.2
   table_calendar: ^3.2.0
   siqma_field: ^1.0.1
+  dio: ^5.9.0
+  flutter_secure_storage: ^9.2.4
+  get_it: ^8.2.0
 
 dev_dependencies:
   flutter_test:

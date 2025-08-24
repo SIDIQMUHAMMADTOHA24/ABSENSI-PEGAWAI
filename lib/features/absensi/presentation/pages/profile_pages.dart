@@ -5,9 +5,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../bloc/auth/auth_bloc.dart';
+import '../bloc/user/user_bloc.dart';
 
 class ProfilePages extends StatelessWidget {
   const ProfilePages({super.key});
+
+  String ellipseMiddle(String s, {int head = 4, int tail = 4}) {
+    if (s.length <= head + tail + 3) return s;
+    return '${s.substring(0, head)}...${s.substring(s.length - tail)}';
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -16,52 +22,61 @@ class ProfilePages extends StatelessWidget {
         SliverToBoxAdapter(
           child: SizedBox(height: MediaQuery.paddingOf(context).top + 40),
         ),
-        SliverToBoxAdapter(
-          child: Column(
-            children: [
-              Icon(
-                CupertinoIcons.person_alt_circle_fill,
-                size: 180,
-                color: Color(0xff343c60),
-              ),
-              SizedBox(height: 20),
-              Text(
-                'Sidiq',
-                style: const TextStyle(
-                  color: Color(0xffE5E7EB),
-                  fontSize: 30,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.symmetric(vertical: 4),
-                child: Text(
-                  'ID: 202406172025',
-                  style: const TextStyle(
-                    color: Color(0xff9CA3AF),
-                    fontSize: 16,
+        BlocBuilder<UserBloc, UserState>(
+          builder: (context, state) {
+            return SliverToBoxAdapter(
+              child: Column(
+                children: [
+                  Icon(
+                    CupertinoIcons.person_alt_circle_fill,
+                    size: 180,
+                    color: Color(0xff343c60),
                   ),
-                ),
-              ),
-              Text(
-                'Enginer',
-                style: const TextStyle(color: Color(0xff9CA3AF), fontSize: 16),
-              ),
+                  SizedBox(height: 20),
+                  Text(
+                    (state is UserSuccess) ? state.data.username : "",
+                    style: const TextStyle(
+                      color: Color(0xffE5E7EB),
+                      fontSize: 30,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 4),
+                    child: Text(
+                      (state is UserSuccess)
+                          ? ellipseMiddle(state.data.id)
+                          : "",
+                      style: const TextStyle(
+                        color: Color(0xff9CA3AF),
+                        fontSize: 16,
+                      ),
+                    ),
+                  ),
+                  Text(
+                    (state is UserSuccess) ? state.data.jabatan : "",
+                    style: const TextStyle(
+                      color: Color(0xff9CA3AF),
+                      fontSize: 16,
+                    ),
+                  ),
 
-              BlocListener<AuthBloc, AuthState>(
-                listener: (context, state) {
-                  if (state is AuthLogOut) {
-                    Nav.remove(context, LoginPages());
-                  }
-                },
-                child: menuWidget(
-                  onTap: () {
-                    context.read<AuthBloc>().add(LogoutEvent());
-                  },
-                ),
+                  BlocListener<AuthBloc, AuthState>(
+                    listener: (context, state) {
+                      if (state is AuthLogOut) {
+                        Nav.remove(context, LoginPages());
+                      }
+                    },
+                    child: menuWidget(
+                      onTap: () {
+                        context.read<AuthBloc>().add(LogoutEvent());
+                      },
+                    ),
+                  ),
+                ],
               ),
-            ],
-          ),
+            );
+          },
         ),
       ],
     );

@@ -38,7 +38,6 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         username: event.username,
         password: event.password,
       );
-      print('result = $result');
       await saveRefreshTokenUC(result.refreshToken);
       emit(AuthLogIn('Login Success'));
     } catch (_) {

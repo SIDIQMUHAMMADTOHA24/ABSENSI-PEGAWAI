@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+
+import '../bloc/status/status_bloc.dart';
 
 class DashboardPages extends StatelessWidget {
   const DashboardPages({super.key});
@@ -221,95 +224,101 @@ class DashboardPages extends StatelessWidget {
           color: const Color(0xff232544),
           borderRadius: BorderRadius.circular(20),
         ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text(
-              "Lokasi Anda",
-              style: TextStyle(color: Color(0xff9CA3AF), fontSize: 16),
-            ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  "Lat: xxx",
-                  style: const TextStyle(
-                    color: Color(0xffE5E7EB),
-                    fontSize: 18,
-                  ),
-                ),
-                Text(
-                  "Long: xxx",
-                  style: const TextStyle(
-                    color: Color(0xffE5E7EB),
-                    fontSize: 18,
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 4),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        child: BlocBuilder<StatusBloc, StatusState>(
+          builder: (context, state) {
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const Text(
-                  "Jarak ke Kantor:",
-                  style: TextStyle(color: Color(0xff9CA3AF), fontSize: 14),
+                  "Lokasi Anda",
+                  style: TextStyle(color: Color(0xff9CA3AF), fontSize: 16),
                 ),
-                Text(
-                  "8 m",
-                  style: const TextStyle(
-                    color: Color(0xff9CA3AF),
-                    fontSize: 14,
-                  ),
-                ),
-              ],
-            ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                Container(
-                  margin: const EdgeInsets.symmetric(vertical: 8),
-                  padding: const EdgeInsets.symmetric(
-                    vertical: 8,
-                    horizontal: 12,
-                  ),
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(100),
-                    color: const Color(0xFF10B981),
-                    // ? const Color(0xFF10B981)
-                    // : const Color(0xFFEF4444),
-                  ),
-                  child: Text(
-                    "Di dalam area",
-                    style: const TextStyle(
-                      color: Color(0xffE5E7EB),
-                      fontSize: 14,
-                      fontWeight: FontWeight.w500,
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      "Lat: ${state.userLat ?? '-'}",
+                      style: const TextStyle(
+                        color: Color(0xffE5E7EB),
+                        fontSize: 18,
+                      ),
                     ),
-                  ),
+                    Text(
+                      "Long: ${state.userLng ?? '-'}",
+                      style: const TextStyle(
+                        color: Color(0xffE5E7EB),
+                        fontSize: 18,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 4),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const Text(
+                      "Jarak ke Kantor:",
+                      style: TextStyle(color: Color(0xff9CA3AF), fontSize: 14),
+                    ),
+                    Text(
+                      "${state.distanceM?.toStringAsFixed(1) ?? '0'} m",
+                      style: const TextStyle(
+                        color: Color(0xff9CA3AF),
+                        fontSize: 14,
+                      ),
+                    ),
+                  ],
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    Container(
+                      margin: const EdgeInsets.symmetric(vertical: 8),
+                      padding: const EdgeInsets.symmetric(
+                        vertical: 8,
+                        horizontal: 12,
+                      ),
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(100),
+                        color: (state.inside ?? false)
+                            ? const Color(0xFF10B981)
+                            : const Color(0xFFEF4444),
+                      ),
+                      child: Text(
+                        (state.inside ?? false)
+                            ? "Di dalam area"
+                            : "Di luar area",
+                        style: TextStyle(
+                          color: Color(0xffE5E7EB),
+                          fontSize: 14,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const Divider(color: Color.fromARGB(23, 229, 231, 235)),
+                const SizedBox(height: 4),
+                const Text(
+                  "Lokasi Kantor",
+                  style: TextStyle(color: Color(0xff9CA3AF), fontSize: 16),
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      "Lat: ${state.officeLat ?? '-'}",
+                      style: TextStyle(color: Color(0xffE5E7EB), fontSize: 18),
+                    ),
+                    Text(
+                      "Long: ${state.officeLng ?? '-'}",
+                      style: TextStyle(color: Color(0xffE5E7EB), fontSize: 18),
+                    ),
+                  ],
                 ),
               ],
-            ),
-            const Divider(color: Color.fromARGB(23, 229, 231, 235)),
-            const SizedBox(height: 4),
-            const Text(
-              "Lokasi Kantor",
-              style: TextStyle(color: Color(0xff9CA3AF), fontSize: 16),
-            ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  "Lat: xxx",
-                  style: TextStyle(color: Color(0xffE5E7EB), fontSize: 18),
-                ),
-                Text(
-                  "Long: xxx",
-                  style: TextStyle(color: Color(0xffE5E7EB), fontSize: 18),
-                ),
-              ],
-            ),
-          ],
+            );
+          },
         ),
       ),
     );

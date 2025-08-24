@@ -5,7 +5,7 @@ import '../../entities/auth_result.dart';
 class Login {
   final AuthRepository authRepository;
 
-  Login({required this.authRepository});
+  Login(this.authRepository);
 
   Future<AuthResult> call({
     required String username,
