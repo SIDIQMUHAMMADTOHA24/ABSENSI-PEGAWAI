@@ -1,13 +1,30 @@
-import 'package:absensi_pegawai/bloc/attendance/attendance_bloc.dart';
-import 'package:absensi_pegawai/repository/attendance_repository.dart';
-import 'package:absensi_pegawai/views/dashboard_view.dart';
-import 'package:absensi_pegawai/views/login_view.dart';
-import 'package:absensi_pegawai/views/widgets/bottom_nav_bar_widget.dart';
+import 'package:absensi_pegawai/features/absensi/data/local/token_storage.dart';
+import 'package:absensi_pegawai/features/absensi/presentation/bloc/status/status_bloc.dart';
+import 'package:absensi_pegawai/features/absensi/presentation/bloc/user/user_bloc.dart';
+
+import 'package:absensi_pegawai/features/absensi/presentation/pages/login_pages.dart';
+import 'package:absensi_pegawai/features/absensi/presentation/widgets/bottom_nav_bar_widget.dart';
+import 'package:absensi_pegawai/inject.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-void main() {
-  runApp(const MyApp());
+import 'features/absensi/presentation/bloc/auth/auth_bloc.dart';
+
+void main(List<String> args) async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  await injectDI();
+  runApp(
+    MultiBlocProvider(
+      providers: [
+        BlocProvider(create: (_) => sl<AuthBloc>()),
+        BlocProvider(create: (_) => sl<UserBloc>()..add(GetUserEvent())),
+        BlocProvider(create: (_) => sl<StatusBloc>()..add(Init())),
+      ],
+      child: MyApp(),
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {
@@ -16,20 +33,17 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return MultiBlocProvider(
-      providers: [
-        BlocProvider(
-          create: (context) =>
-              AttendanceBloc(AttendanceRepository())..add(AppStarted()),
-        ),
-      ],
-      child: MaterialApp(
-        title: 'Flutter Demo',
-        debugShowCheckedModeBanner: false,
-        theme: ThemeData(
-          colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-        ),
-        home: LoginView(),
+    return MaterialApp(
+      title: 'Flutter Demo',
+      debugShowCheckedModeBanner: false,
+      theme: ThemeData(
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+      ),
+      home: FutureBuilder(
+        future: sl<TokenStorage>().readRefreshToken(),
+        builder: (context, snap) {
+          return (snap.hasData) ? BottomNavBarWidget() : LoginPages();
+        },
       ),
     );
   }
