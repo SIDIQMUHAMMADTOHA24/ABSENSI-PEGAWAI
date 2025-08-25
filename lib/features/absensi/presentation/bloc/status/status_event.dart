@@ -17,3 +17,15 @@ class PositionChanged extends StatusEvent {
   @override
   List<Object> get props => [pos];
 }
+
+class RefreshServerStatus extends StatusEvent {
+  const RefreshServerStatus();
+}
+
+class RequestCheckIn extends StatusEvent {
+  const RequestCheckIn();
+}
+
+class RequestCheckOut extends StatusEvent {
+  const RequestCheckOut();
+}

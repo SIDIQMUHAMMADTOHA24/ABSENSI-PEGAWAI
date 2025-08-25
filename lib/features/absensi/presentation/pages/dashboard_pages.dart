@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:intl/intl.dart';
 
 import '../bloc/status/status_bloc.dart';
 
@@ -38,179 +39,218 @@ class DashboardPages extends StatelessWidget {
 
   SliverToBoxAdapter chipActionWidget() {
     return SliverToBoxAdapter(
-      child: Container(
-        padding: const EdgeInsets.all(20),
-        margin: const EdgeInsets.all(20),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(20),
-          gradient: const LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [Color(0xff252745), Color(0xff483477)],
-          ),
-        ),
-        child: Column(
-          children: [
-            Row(
+      child: BlocBuilder<StatusBloc, StatusState>(
+        builder: (context, state) {
+          // SAFETY DEFAULTS
+          final inside = state.inside ?? false;
+          final radius = state.radiusM ?? 0;
+
+          final inAt = state.checkInAt;
+          final outAt = state.checkOutAt;
+
+          final checkIn = (inAt != null)
+              ? '- ${DateFormat('HH:mm:ss').format(inAt.toLocal())}'
+              : '-';
+          final checkOut = (outAt != null)
+              ? '- ${DateFormat('HH:mm:ss').format(outAt.toLocal())}'
+              : '-';
+
+          // ENABLE/DISABLE BUTTON
+          final canCheckIn = inside && inAt == null;
+          final canCheckOut = inside && inAt != null && outAt == null;
+
+          return Container(
+            padding: const EdgeInsets.all(20),
+            margin: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(20),
+              gradient: const LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [Color(0xff252745), Color(0xff483477)],
+              ),
+            ),
+            child: Column(
               children: [
-                CircleAvatar(
-                  backgroundColor: Color(0xff392d62),
-                  child: Container(
-                    width: 20,
-                    height: 20,
-                    padding: EdgeInsets.all(3),
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(100),
-                      border: Border.all(color: Color(0xffE5E7EB), width: 2),
+                Row(
+                  children: [
+                    CircleAvatar(
+                      backgroundColor: Color(0xff392d62),
+                      child: Container(
+                        width: 20,
+                        height: 20,
+                        padding: EdgeInsets.all(3),
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(100),
+                          border: Border.all(
+                            color: Color(0xffE5E7EB),
+                            width: 2,
+                          ),
+                        ),
+                        child: CircleAvatar(backgroundColor: Color(0xffE5E7EB)),
+                      ),
                     ),
-                    child: CircleAvatar(backgroundColor: Color(0xffE5E7EB)),
+                    const SizedBox(width: 12),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          "Status",
+                          style: TextStyle(
+                            color: Color(0xff9CA3AF),
+                            fontSize: 16,
+                          ),
+                        ),
+                        Text(
+                          inside ? "Di dalam area" : "Di luar area",
+                          style: const TextStyle(
+                            color: Color(0xffE5E7EB),
+                            fontSize: 18,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+                Container(
+                  padding: const EdgeInsets.all(16),
+                  margin: const EdgeInsets.only(top: 12),
+                  decoration: BoxDecoration(
+                    border: Border.all(
+                      color: const Color.fromARGB(23, 229, 231, 235),
+                    ),
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          const Text(
+                            "Hari ini",
+                            style: TextStyle(
+                              color: Color(0xff9CA3AF),
+                              fontSize: 14,
+                            ),
+                          ),
+                          Text(
+                            "Radius $radius m",
+                            style: const TextStyle(
+                              color: Color(0xff9CA3AF),
+                              fontSize: 12,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        DateFormat('d MMMM y', 'en_US').format(DateTime.now()),
+                        style: const TextStyle(
+                          color: Color(0xffE5E7EB),
+                          fontSize: 18,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            checkIn,
+                            style: const TextStyle(
+                              color: Color(0xff9CA3AF),
+                              fontSize: 16,
+                            ),
+                          ),
+                          Text(
+                            checkOut,
+                            style: const TextStyle(
+                              color: Color(0xff9CA3AF),
+                              fontSize: 16,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
                   ),
                 ),
-                const SizedBox(width: 12),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                const SizedBox(height: 12),
+                const Text(
+                  "Pastikan Anda berada didalam radius kantor untuk melakukan Check In/Out",
+                  style: TextStyle(color: Color(0xffE5E7EB), fontSize: 16),
+                ),
+                const SizedBox(height: 12),
+                Row(
                   children: [
-                    const Text(
-                      "Status",
-                      style: TextStyle(color: Color(0xff9CA3AF), fontSize: 16),
+                    Expanded(
+                      child: Material(
+                        color: canCheckIn
+                            ? const Color(0xff343c60)
+                            : Color(0xff1e213a),
+                        borderRadius: BorderRadius.circular(8),
+                        child: InkWell(
+                          onTap: canCheckIn
+                              ? () => context.read<StatusBloc>().add(
+                                  const RequestCheckIn(),
+                                )
+                              : null,
+                          focusColor: canCheckIn
+                              ? const Color(0xff343c60)
+                              : Color(0xff1e213a),
+                          borderRadius: BorderRadius.circular(8),
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(vertical: 12),
+                            alignment: Alignment.center,
+                            child: const Text(
+                              "Check In",
+                              style: TextStyle(
+                                color: Color(0xffE5E7EB),
+                                fontSize: 16,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
                     ),
-                    Text(
-                      "Di luar area",
-                      style: const TextStyle(
-                        color: Color(0xffE5E7EB),
-                        fontSize: 18,
-                        fontWeight: FontWeight.w500,
+                    const SizedBox(width: 20),
+                    Expanded(
+                      child: Material(
+                        color: canCheckOut
+                            ? const Color(0xff343c60)
+                            : const Color(0xff1e213a),
+                        borderRadius: BorderRadius.circular(8),
+                        child: InkWell(
+                          onTap: canCheckOut
+                              ? () => context.read<StatusBloc>().add(
+                                  const RequestCheckOut(),
+                                )
+                              : null,
+                          borderRadius: BorderRadius.circular(8),
+                          focusColor: canCheckOut
+                              ? const Color(0xff343c60)
+                              : const Color(0xff1e213a),
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(vertical: 12),
+                            alignment: Alignment.center,
+                            child: const Text(
+                              "Check Out",
+                              style: TextStyle(
+                                color: Color(0xffE5E7EB),
+                                fontSize: 16,
+                              ),
+                            ),
+                          ),
+                        ),
                       ),
                     ),
                   ],
                 ),
               ],
             ),
-            Container(
-              padding: const EdgeInsets.all(16),
-              margin: const EdgeInsets.only(top: 12),
-              decoration: BoxDecoration(
-                border: Border.all(
-                  color: const Color.fromARGB(23, 229, 231, 235),
-                ),
-                borderRadius: BorderRadius.circular(16),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: const [
-                      Text(
-                        "Hari ini",
-                        style: TextStyle(
-                          color: Color(0xff9CA3AF),
-                          fontSize: 14,
-                        ),
-                      ),
-                      Text(
-                        "Radius 20 m",
-                        style: TextStyle(
-                          color: Color(0xff9CA3AF),
-                          fontSize: 12,
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    "08:00",
-                    style: const TextStyle(
-                      color: Color(0xffE5E7EB),
-                      fontSize: 18,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        "- 08:00",
-                        style: const TextStyle(
-                          color: Color(0xff9CA3AF),
-                          fontSize: 16,
-                        ),
-                      ),
-                      Text(
-                        "- 08:00",
-                        style: const TextStyle(
-                          color: Color(0xff9CA3AF),
-                          fontSize: 16,
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 12),
-            const Text(
-              "Pastikan Anda berada didalam radius kantor untuk melakukan Check In/Out",
-              style: TextStyle(color: Color(0xffE5E7EB), fontSize: 16),
-            ),
-            const SizedBox(height: 12),
-            Row(
-              children: [
-                Expanded(
-                  child: Opacity(
-                    opacity: 1,
-                    child: GestureDetector(
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(vertical: 12),
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(8),
-                          color: const Color(0xff343c60),
-                          // color: (state.checkInAt == null)
-                          //     ? const Color(0xff343c60)
-                          //     : Color(0xff1e213a),
-                        ),
-                        alignment: Alignment.center,
-                        child: const Text(
-                          "Check In",
-                          style: TextStyle(
-                            color: Color(0xffE5E7EB),
-                            fontSize: 16,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 20),
-                Expanded(
-                  child: Opacity(
-                    opacity: 1,
-                    child: GestureDetector(
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(vertical: 12),
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(8),
-                          color: const Color(0xff343c60),
-                          // ? const Color(0xff343c60)
-                          // : const Color(0xff1e213a),
-                        ),
-                        alignment: Alignment.center,
-                        child: const Text(
-                          "Check Out",
-                          style: TextStyle(
-                            color: Color(0xffE5E7EB),
-                            fontSize: 16,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ],
-        ),
+          );
+        },
       ),
     );
   }

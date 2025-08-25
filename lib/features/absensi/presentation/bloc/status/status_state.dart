@@ -12,6 +12,12 @@ class StatusState extends Equatable {
   final double? distanceM;
   final bool? inside;
 
+  final DateTime? todayDate;
+  final DateTime? checkInAt;
+  final DateTime? checkOutAt;
+  final int? workedSeconds;
+  final NextAction? nextAction;
+
   const StatusState({
     this.loading = false,
     this.error,
@@ -23,6 +29,11 @@ class StatusState extends Equatable {
     this.radiusM,
     this.distanceM,
     this.inside,
+    this.todayDate,
+    this.checkInAt,
+    this.checkOutAt,
+    this.workedSeconds,
+    this.nextAction,
   });
 
   StatusState copy({
@@ -36,6 +47,11 @@ class StatusState extends Equatable {
     int? radiusM,
     double? distanceM,
     bool? inside,
+    DateTime? todayDate,
+    DateTime? checkInAt,
+    DateTime? checkOutAt,
+    int? workedSeconds,
+    NextAction? nextAction,
   }) => StatusState(
     loading: loading ?? this.loading,
     error: error,
@@ -47,6 +63,10 @@ class StatusState extends Equatable {
     radiusM: radiusM ?? this.radiusM,
     distanceM: distanceM ?? this.distanceM,
     inside: inside ?? this.inside,
+    checkInAt: checkInAt ?? this.checkInAt,
+    checkOutAt: checkOutAt ?? this.checkOutAt,
+    workedSeconds: workedSeconds ?? this.workedSeconds,
+    nextAction: nextAction ?? this.nextAction,
   );
 
   @override
@@ -61,5 +81,10 @@ class StatusState extends Equatable {
     radiusM,
     distanceM,
     inside,
+    todayDate,
+    checkInAt,
+    checkOutAt,
+    workedSeconds,
+    nextAction,
   ];
 }

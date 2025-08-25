@@ -1,14 +1,17 @@
 import 'package:absensi_pegawai/core/access_token_holder.dart';
 import 'package:absensi_pegawai/core/dio_client.dart';
+import 'package:absensi_pegawai/features/absensi/data/datasources/attendance_remote_data_source.dart';
 import 'package:absensi_pegawai/features/absensi/data/datasources/auth_remote_data_source.dart';
 import 'package:absensi_pegawai/features/absensi/data/datasources/location_local_data_source.dart';
 import 'package:absensi_pegawai/features/absensi/data/datasources/user_remote_data_source.dart';
 import 'package:absensi_pegawai/features/absensi/data/local/office_storage.dart';
 import 'package:absensi_pegawai/features/absensi/data/local/token_storage.dart';
+import 'package:absensi_pegawai/features/absensi/data/repositories/attendance_repository_impl.dart';
 import 'package:absensi_pegawai/features/absensi/data/repositories/auth_repository_impl.dart';
 import 'package:absensi_pegawai/features/absensi/data/repositories/location_repository_impl.dart';
 import 'package:absensi_pegawai/features/absensi/data/repositories/session_repository_impl.dart';
 import 'package:absensi_pegawai/features/absensi/data/repositories/user_repository_impl.dart';
+import 'package:absensi_pegawai/features/absensi/domain/repositories/attendance_repository.dart';
 import 'package:absensi_pegawai/features/absensi/domain/repositories/auth_repository.dart';
 import 'package:absensi_pegawai/features/absensi/domain/repositories/location_repository.dart';
 import 'package:absensi_pegawai/features/absensi/domain/repositories/office_repository.dart';
@@ -17,6 +20,9 @@ import 'package:absensi_pegawai/features/absensi/domain/usecases/absensi/ensure_
 import 'package:absensi_pegawai/features/absensi/domain/usecases/absensi/get_current_pos.dart';
 import 'package:absensi_pegawai/features/absensi/domain/usecases/absensi/get_office_config.dart';
 import 'package:absensi_pegawai/features/absensi/domain/usecases/absensi/watch_position.dart';
+import 'package:absensi_pegawai/features/absensi/domain/usecases/attendance/check_in.dart';
+import 'package:absensi_pegawai/features/absensi/domain/usecases/attendance/check_out.dart';
+import 'package:absensi_pegawai/features/absensi/domain/usecases/attendance/get_attendance_status.dart';
 import 'package:absensi_pegawai/features/absensi/domain/usecases/auth/login.dart';
 import 'package:absensi_pegawai/features/absensi/domain/usecases/auth/logout.dart';
 import 'package:absensi_pegawai/features/absensi/domain/usecases/auth/register.dart';
@@ -49,6 +55,7 @@ Future<void> injectDI() async {
   sl.registerLazySingleton(() => UserRemoteDataSource(sl<Dio>()));
   sl.registerLazySingleton(() => LocationLocalDataSource());
   sl.registerLazySingleton(() => OfficeRemoteDataSource(sl<Dio>()));
+  sl.registerLazySingleton(() => AttendanceRemoteDataSource(sl<Dio>()));
 
   //LOCAL
   sl.registerLazySingleton(() => TokenStorage());
@@ -78,6 +85,9 @@ Future<void> injectDI() async {
   sl.registerLazySingleton<LocationRepository>(
     () => LocationRepositoryImpl(sl()),
   );
+  sl.registerLazySingleton<AttendanceRepository>(
+    () => AttendanceRepositoryImpl(sl()),
+  );
 
   //USE CASE
   sl.registerLazySingleton(() => Login(sl()));
@@ -91,6 +101,9 @@ Future<void> injectDI() async {
   sl.registerLazySingleton(() => GetCurrentPos(sl()));
   sl.registerLazySingleton(() => GetOfficeConfig(sl()));
   sl.registerLazySingleton(() => WatchPosition(sl()));
+  sl.registerLazySingleton(() => CheckIn(sl()));
+  sl.registerLazySingleton(() => CheckOut(sl()));
+  sl.registerLazySingleton(() => GetAttendanceStatus(sl()));
 
   //BLOC
   sl.registerFactory(
@@ -110,6 +123,9 @@ Future<void> injectDI() async {
       getCurrentPos: sl<GetCurrentPos>(),
       watchPosition: sl<WatchPosition>(),
       getOfficeConfig: sl<GetOfficeConfig>(),
+      checkIn: sl<CheckIn>(),
+      checkOut: sl<CheckOut>(),
+      getAttendanceStatus: sl<GetAttendanceStatus>(),
     ),
   );
 }

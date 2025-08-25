@@ -11,24 +11,28 @@ class AttendanceRemoteDataSource {
       '/attendance/status',
       data: {if (lat != null) 'lat': lat, if (long != null) 'lng': long},
     );
+    print('lat status = $lat');
+    print('long status = $long');
+    print('data status = ${res.data}');
     if (res.statusCode != 200) throw Exception('status failed');
     return AttendanceStatusModel.fromJson(Map.from(res.data));
   }
 
-  Future<void> checkIn({required double lat, required double lng}) async {
+  Future<void> checkIn({required double lat, required double long}) async {
     final res = await dio.post(
       '/attendance/check-in',
-      data: {'lat': lat, 'lng': lng},
+      data: {'lat': lat, 'lng': long},
     );
+    print('data = ${res.data}');
     if (res.statusCode != 200 && res.statusCode != 201) {
       throw Exception('check-in failed');
     }
   }
 
-  Future<void> checkOut({required double lat, required double lng}) async {
+  Future<void> checkOut({required double lat, required double long}) async {
     final res = await dio.post(
       '/attendance/check-out',
-      data: {'lat': lat, 'lng': lng},
+      data: {'lat': lat, 'lng': long},
     );
     if (res.statusCode != 200) {
       throw Exception('check-out failed');
