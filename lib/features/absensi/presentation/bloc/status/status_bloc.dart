@@ -145,7 +145,7 @@ class StatusBloc extends Bloc<StatusEvent, StatusState> {
     if (!(state.inside ?? false)) return;
     try {
       print('skiw');
-      await checkIn(lat: lat, long: lng);
+      await checkIn(lat: lat, long: lng, selfieBase64: e.selfieBase64);
       add(const RefreshServerStatus());
     } catch (e) {
       print('error = $e');
@@ -158,7 +158,7 @@ class StatusBloc extends Bloc<StatusEvent, StatusState> {
     if (lat == null || long == null) return;
     if (!(state.inside ?? false)) return;
     try {
-      await checkOut(lat: lat, long: long);
+      await checkOut(lat: lat, long: long, selfieBase64: e.selfieBase64);
       add(const RefreshServerStatus());
     } catch (e) {
       print('error = $e');

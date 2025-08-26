@@ -11,13 +11,25 @@ class AttendanceRepositoryImpl implements AttendanceRepository {
   AttendanceRepositoryImpl(this.repository);
 
   @override
-  Future<void> checkIn({required double lat, required double long}) {
-    return repository.checkIn(lat: lat, long: long);
+  Future<void> checkIn({
+    required double lat,
+    required double long,
+    required String selfieBase64,
+  }) {
+    return repository.checkIn(lat: lat, long: long, selfieBase64: selfieBase64);
   }
 
   @override
-  Future<void> checkOut({required double lat, required double long}) {
-    return repository.checkOut(lat: lat, long: long);
+  Future<void> checkOut({
+    required double lat,
+    required double long,
+    required String selfieBase64,
+  }) {
+    return repository.checkOut(
+      lat: lat,
+      long: long,
+      selfieBase64: selfieBase64,
+    );
   }
 
   @override

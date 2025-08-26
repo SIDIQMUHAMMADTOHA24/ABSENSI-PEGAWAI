@@ -23,9 +23,15 @@ class RefreshServerStatus extends StatusEvent {
 }
 
 class RequestCheckIn extends StatusEvent {
-  const RequestCheckIn();
+  final String selfieBase64;
+  const RequestCheckIn(this.selfieBase64);
+  @override
+  List<Object> get props => [selfieBase64];
 }
 
 class RequestCheckOut extends StatusEvent {
-  const RequestCheckOut();
+  final String selfieBase64;
+  const RequestCheckOut(this.selfieBase64);
+  @override
+  List<Object> get props => [selfieBase64];
 }

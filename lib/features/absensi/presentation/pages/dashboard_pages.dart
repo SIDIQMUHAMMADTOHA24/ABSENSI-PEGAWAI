@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 
+import '../../../../core/selfie_capture.dart';
 import '../bloc/status/status_bloc.dart';
 
 class DashboardPages extends StatelessWidget {
@@ -192,9 +193,15 @@ class DashboardPages extends StatelessWidget {
                         borderRadius: BorderRadius.circular(8),
                         child: InkWell(
                           onTap: canCheckIn
-                              ? () => context.read<StatusBloc>().add(
-                                  const RequestCheckIn(),
-                                )
+                              ? () async {
+                                  final b64 = await captureSelfieBase64(
+                                    context,
+                                  );
+                                  if (b64 == null) return;
+                                  context.read<StatusBloc>().add(
+                                    RequestCheckIn(b64),
+                                  );
+                                }
                               : null,
                           focusColor: canCheckIn
                               ? const Color(0xff343c60)
@@ -223,9 +230,14 @@ class DashboardPages extends StatelessWidget {
                         borderRadius: BorderRadius.circular(8),
                         child: InkWell(
                           onTap: canCheckOut
-                              ? () => context.read<StatusBloc>().add(
-                                  const RequestCheckOut(),
-                                )
+                              ? () async {
+                                  final b64 = await captureSelfieBase64(
+                                    context,
+                                  );
+                                  context.read<StatusBloc>().add(
+                                    RequestCheckOut(b64!),
+                                  );
+                                }
                               : null,
                           borderRadius: BorderRadius.circular(8),
                           focusColor: canCheckOut

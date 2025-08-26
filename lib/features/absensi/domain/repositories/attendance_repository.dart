@@ -5,8 +5,16 @@ import '../entities/attendance_marks.dart';
 
 abstract class AttendanceRepository {
   Future<AttendanceStatus> getStatus({double? lat, double? long});
-  Future<void> checkIn({required double lat, required double long});
-  Future<void> checkOut({required double lat, required double long});
+  Future<void> checkIn({
+    required double lat,
+    required double long,
+    required String selfieBase64,
+  });
+  Future<void> checkOut({
+    required double lat,
+    required double long,
+    required String selfieBase64,
+  });
   Future<AttendanceMarks> getMarks({String? month, String tz = 'Asia/Jakarta'});
   Future<AttendanceDayDetail> getDay({
     required String date,
