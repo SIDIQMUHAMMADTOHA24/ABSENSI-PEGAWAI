@@ -1,6 +1,9 @@
 import 'package:absensi_pegawai/features/absensi/data/models/attendance_model.dart';
 import 'package:dio/dio.dart';
 
+import '../models/attendance_day_detail_model.dart';
+import '../models/attendance_marks_model.dart';
+
 class AttendanceRemoteDataSource {
   final Dio dio;
 
@@ -37,5 +40,30 @@ class AttendanceRemoteDataSource {
     if (res.statusCode != 200) {
       throw Exception('check-out failed');
     }
+  }
+
+  Future<AttendanceMarksModel> getMarks({
+    String? month,
+    String tz = 'Asia/Jakarta',
+  }) async {
+    final qp = <String, dynamic>{'tz': tz, if (month != null) 'month': month};
+    final res = await dio.get('/attendance/marks', queryParameters: qp);
+    if (res.statusCode != 200) throw Exception('get marks failed');
+    return AttendanceMarksModel.fromJson(Map<String, dynamic>.from(res.data));
+  }
+
+  // --- BARU: detail per hari ---
+  Future<AttendanceDayDetailModel> getDay({
+    required String date,
+    String tz = 'Asia/Jakarta',
+  }) async {
+    final res = await dio.get(
+      '/attendance/day',
+      queryParameters: {'date': date, 'tz': tz},
+    );
+    if (res.statusCode != 200) throw Exception('get day failed');
+    return AttendanceDayDetailModel.fromJson(
+      Map<String, dynamic>.from(res.data),
+    );
   }
 }

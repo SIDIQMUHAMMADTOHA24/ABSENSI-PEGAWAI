@@ -16,12 +16,19 @@ class LoginPages extends StatefulWidget {
 class _LoginPagesState extends State<LoginPages> {
   final usernameController = TextEditingController();
   final passwordController = TextEditingController();
+  bool isVisible = true;
 
   @override
   void dispose() {
     usernameController.dispose();
     passwordController.dispose();
     super.dispose();
+  }
+
+  void onVisible() {
+    setState(() {
+      isVisible = !isVisible;
+    });
   }
 
   @override
@@ -68,8 +75,18 @@ class _LoginPagesState extends State<LoginPages> {
                       SiqmaField(
                         label: 'Password',
                         controller: passwordController,
+                        obscureText: isVisible,
+                        obscuringCharacter: "●",
                         borderColor: Color.fromARGB(30, 229, 231, 235),
                         fontStyle: TextStyle(color: Color(0xffE5E7EB)),
+                        suffixIcon: GestureDetector(
+                          onTap: onVisible,
+                          child: Icon(
+                            isVisible
+                                ? CupertinoIcons.eye
+                                : CupertinoIcons.eye_slash,
+                          ),
+                        ),
                       ),
                       SizedBox(height: 16),
                       Material(

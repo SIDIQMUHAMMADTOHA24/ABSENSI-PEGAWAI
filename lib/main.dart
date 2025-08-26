@@ -1,3 +1,4 @@
+import 'package:absensi_pegawai/features/absensi/presentation/bloc/calender/calender_bloc.dart';
 import 'package:absensi_pegawai/inject.dart';
 
 import 'package:flutter/material.dart';
@@ -23,6 +24,10 @@ void main(List<String> args) async {
         BlocProvider(create: (_) => sl<AuthBloc>()),
         BlocProvider(create: (_) => sl<UserBloc>()..add(GetUserEvent())),
         BlocProvider(create: (_) => sl<StatusBloc>()..add(Init())),
+        BlocProvider(
+          create: (_) =>
+              sl<CalenderBloc>()..add(LoadMonth(monthAnchor: DateTime.now())),
+        ),
       ],
       child: MyApp(),
     ),

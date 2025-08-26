@@ -18,7 +18,7 @@ class DashboardPages extends StatelessWidget {
           SliverToBoxAdapter(
             child: Center(
               child: Text(
-                "PT Nikel Prima Gemilang",
+                "PT Migas Darma Nusantara",
                 style: TextStyle(
                   color: Color(0xffE5E7EB),
                   fontSize: 24,

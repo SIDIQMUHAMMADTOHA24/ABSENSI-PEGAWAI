@@ -22,6 +22,7 @@ import 'package:absensi_pegawai/features/absensi/domain/usecases/absensi/get_off
 import 'package:absensi_pegawai/features/absensi/domain/usecases/absensi/watch_position.dart';
 import 'package:absensi_pegawai/features/absensi/domain/usecases/attendance/check_in.dart';
 import 'package:absensi_pegawai/features/absensi/domain/usecases/attendance/check_out.dart';
+import 'package:absensi_pegawai/features/absensi/domain/usecases/attendance/get_attendance_day.dart';
 import 'package:absensi_pegawai/features/absensi/domain/usecases/attendance/get_attendance_status.dart';
 import 'package:absensi_pegawai/features/absensi/domain/usecases/auth/login.dart';
 import 'package:absensi_pegawai/features/absensi/domain/usecases/auth/logout.dart';
@@ -31,6 +32,7 @@ import 'package:absensi_pegawai/features/absensi/domain/usecases/session/read_re
 import 'package:absensi_pegawai/features/absensi/domain/usecases/session/save_refresh_token.dart';
 import 'package:absensi_pegawai/features/absensi/domain/usecases/user/get_user.dart';
 import 'package:absensi_pegawai/features/absensi/presentation/bloc/auth/auth_bloc.dart';
+import 'package:absensi_pegawai/features/absensi/presentation/bloc/calender/calender_bloc.dart';
 import 'package:absensi_pegawai/features/absensi/presentation/bloc/status/status_bloc.dart';
 import 'package:absensi_pegawai/features/absensi/presentation/bloc/user/user_bloc.dart';
 import 'package:dio/dio.dart';
@@ -39,6 +41,7 @@ import 'package:get_it/get_it.dart';
 import 'features/absensi/data/datasources/office_remote_data_source.dart';
 import 'features/absensi/data/repositories/office_repository_impl.dart';
 import 'features/absensi/domain/repositories/session_repository.dart';
+import 'features/absensi/domain/usecases/attendance/get_attendance_marks.dart';
 
 final sl = GetIt.I;
 
@@ -104,6 +107,8 @@ Future<void> injectDI() async {
   sl.registerLazySingleton(() => CheckIn(sl()));
   sl.registerLazySingleton(() => CheckOut(sl()));
   sl.registerLazySingleton(() => GetAttendanceStatus(sl()));
+  sl.registerLazySingleton(() => GetAttendanceMarks(sl()));
+  sl.registerLazySingleton(() => GetAttendanceDay(sl()));
 
   //BLOC
   sl.registerFactory(
@@ -127,5 +132,8 @@ Future<void> injectDI() async {
       checkOut: sl<CheckOut>(),
       getAttendanceStatus: sl<GetAttendanceStatus>(),
     ),
+  );
+  sl.registerFactory(
+    () => CalenderBloc(sl<GetAttendanceMarks>(), sl<GetAttendanceDay>()),
   );
 }
