@@ -1,50 +1,54 @@
-import 'package:absensi_pegawai/features/absensi/data/local/token_storage.dart';
-import 'package:absensi_pegawai/features/absensi/presentation/bloc/status/status_bloc.dart';
-import 'package:absensi_pegawai/features/absensi/presentation/bloc/user/user_bloc.dart';
-
-import 'package:absensi_pegawai/features/absensi/presentation/pages/login_pages.dart';
-import 'package:absensi_pegawai/features/absensi/presentation/widgets/bottom_nav_bar_widget.dart';
+import 'package:absensi_pegawai/features/absensi/presentation/bloc/calender/calender_bloc.dart';
 import 'package:absensi_pegawai/inject.dart';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import 'app.dart';
+import 'core/access_token_holder.dart';
+import 'features/absensi/data/datasources/auth_remote_data_source.dart';
+import 'features/absensi/data/local/token_storage.dart';
 import 'features/absensi/presentation/bloc/auth/auth_bloc.dart';
+import 'features/absensi/presentation/bloc/status/status_bloc.dart';
+import 'features/absensi/presentation/bloc/user/user_bloc.dart';
 
 void main(List<String> args) async {
   WidgetsFlutterBinding.ensureInitialized();
 
   await injectDI();
+  await _bootstrapAuth();
+
   runApp(
     MultiBlocProvider(
       providers: [
         BlocProvider(create: (_) => sl<AuthBloc>()),
         BlocProvider(create: (_) => sl<UserBloc>()..add(GetUserEvent())),
         BlocProvider(create: (_) => sl<StatusBloc>()..add(Init())),
+        BlocProvider(
+          create: (_) =>
+              sl<CalenderBloc>()..add(LoadMonth(monthAnchor: DateTime.now())),
+        ),
       ],
       child: MyApp(),
     ),
   );
 }
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+Future<void> _bootstrapAuth() async {
+  final storage = sl<TokenStorage>();
+  final holder = sl<AccessTokenHolder>();
+  final auth = sl<AuthRemoteDataSource>();
 
-  // This widget is the root of your application.
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Flutter Demo',
-      debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-      ),
-      home: FutureBuilder(
-        future: sl<TokenStorage>().readRefreshToken(),
-        builder: (context, snap) {
-          return (snap.hasData) ? BottomNavBarWidget() : LoginPages();
-        },
-      ),
-    );
+  final rft = await storage.readRefreshToken();
+  if ((rft ?? '').isEmpty) return;
+
+  try {
+    final fresh = await auth.refresh(rft!);
+    holder.set(fresh.accessToken); // isi access token utk request awal
+    await storage.saveRefreshToken(fresh.refreshToken); // putar refresh token
+  } catch (_) {
+    // kalau gagal refresh di boot, anggap sesi mati
+    await storage.deleteRefreshToken();
+    holder.clear();
   }
 }

@@ -17,3 +17,21 @@ class PositionChanged extends StatusEvent {
   @override
   List<Object> get props => [pos];
 }
+
+class RefreshServerStatus extends StatusEvent {
+  const RefreshServerStatus();
+}
+
+class RequestCheckIn extends StatusEvent {
+  final String selfieBase64;
+  const RequestCheckIn(this.selfieBase64);
+  @override
+  List<Object> get props => [selfieBase64];
+}
+
+class RequestCheckOut extends StatusEvent {
+  final String selfieBase64;
+  const RequestCheckOut(this.selfieBase64);
+  @override
+  List<Object> get props => [selfieBase64];
+}

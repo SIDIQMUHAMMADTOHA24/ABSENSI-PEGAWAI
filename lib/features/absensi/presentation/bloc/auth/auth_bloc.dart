@@ -5,6 +5,9 @@ import 'package:absensi_pegawai/features/absensi/domain/usecases/session/save_re
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 
+import '../../../../../core/access_token_holder.dart';
+import '../../../../../inject.dart';
+import '../../../data/local/token_storage.dart';
 import '../../../domain/usecases/auth/login.dart';
 import '../../../domain/usecases/auth/register.dart';
 
@@ -38,8 +41,9 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         username: event.username,
         password: event.password,
       );
-      await saveRefreshTokenUC(result.refreshToken);
-      emit(AuthLogIn('Login Success'));
+      sl<AccessTokenHolder>().set(result.accessToken);
+      await sl<TokenStorage>().saveRefreshToken(result.refreshToken);
+      emit(const AuthLogIn('Login Success'));
     } catch (_) {
       emit(const AuthLogOut('Login Failed'));
     }
@@ -65,6 +69,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       String? res = await readRefreshTokenUC();
       if (res != null) {
         await logoutUC(res);
+        sl<AccessTokenHolder>().clear();
         await deleteRefreshTokenUC();
         emit(AuthLogOut("Logout"));
       }

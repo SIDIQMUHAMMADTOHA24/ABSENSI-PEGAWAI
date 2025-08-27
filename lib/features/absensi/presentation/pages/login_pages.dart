@@ -16,12 +16,19 @@ class LoginPages extends StatefulWidget {
 class _LoginPagesState extends State<LoginPages> {
   final usernameController = TextEditingController();
   final passwordController = TextEditingController();
+  bool isVisible = true;
 
   @override
   void dispose() {
     usernameController.dispose();
     passwordController.dispose();
     super.dispose();
+  }
+
+  void onVisible() {
+    setState(() {
+      isVisible = !isVisible;
+    });
   }
 
   @override
@@ -41,7 +48,6 @@ class _LoginPagesState extends State<LoginPages> {
         builder: (context, state) {
           return Stack(
             children: [
-              if (state is AuthLoading) CupertinoActivityIndicator(),
               Center(
                 child: Padding(
                   padding: const EdgeInsets.all(20),
@@ -68,8 +74,19 @@ class _LoginPagesState extends State<LoginPages> {
                       SiqmaField(
                         label: 'Password',
                         controller: passwordController,
+                        obscureText: isVisible,
+                        obscuringCharacter: "●",
                         borderColor: Color.fromARGB(30, 229, 231, 235),
                         fontStyle: TextStyle(color: Color(0xffE5E7EB)),
+                        suffixIcon: GestureDetector(
+                          onTap: onVisible,
+                          child: Icon(
+                            isVisible
+                                ? CupertinoIcons.eye
+                                : CupertinoIcons.eye_slash,
+                            color: Colors.blueGrey,
+                          ),
+                        ),
                       ),
                       SizedBox(height: 16),
                       Material(
@@ -91,13 +108,21 @@ class _LoginPagesState extends State<LoginPages> {
                           child: Padding(
                             padding: EdgeInsets.symmetric(vertical: 14),
                             child: Center(
-                              child: Text(
-                                'Login',
-                                style: TextStyle(
-                                  color: Color(0xffE5E7EB),
-                                  fontSize: 14,
-                                ),
-                              ),
+                              child: (state is AuthLoading)
+                                  ? SizedBox(
+                                      width: 20,
+                                      height: 20,
+                                      child: CircularProgressIndicator(
+                                        strokeWidth: 2,
+                                      ),
+                                    )
+                                  : Text(
+                                      'Login',
+                                      style: TextStyle(
+                                        color: Color(0xffE5E7EB),
+                                        fontSize: 14,
+                                      ),
+                                    ),
                             ),
                           ),
                         ),
