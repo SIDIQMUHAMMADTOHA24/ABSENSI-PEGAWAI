@@ -10,13 +10,13 @@ class DashboardPages extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: EdgeInsets.symmetric(
-        vertical: MediaQuery.paddingOf(context).top + 20,
-      ),
-      child: CustomScrollView(
-        slivers: [
-          SliverToBoxAdapter(
+    return CustomScrollView(
+      slivers: [
+        SliverToBoxAdapter(
+          child: Padding(
+            padding: EdgeInsets.only(
+              top: MediaQuery.paddingOf(context).top + 20,
+            ),
             child: Center(
               child: Text(
                 "PT Migas Darma Nusantara",
@@ -28,13 +28,13 @@ class DashboardPages extends StatelessWidget {
               ),
             ),
           ),
-          // ==== ACTION CHIP ====
-          chipActionWidget(),
+        ),
+        // ==== ACTION CHIP ====
+        chipActionWidget(),
 
-          // ==== LOCATION CHIP ====
-          chipLocationWidget(),
-        ],
-      ),
+        // ==== LOCATION CHIP ====
+        chipLocationWidget(),
+      ],
     );
   }
 
