@@ -51,7 +51,9 @@ Future<void> injectDI() async {
   sl.registerLazySingleton<Duration>(() => Duration(hours: 12));
 
   //BASE DIO
-  sl.registerLazySingleton<Dio>(() => buildDio('http://10.0.2.2:8080'));
+  sl.registerLazySingleton<Dio>(
+    () => buildDio('https://absensi-pegawai.up.railway.app'),
+  );
 
   //DATA SOURCE
   sl.registerLazySingleton(() => AuthRemoteDataSource(sl<Dio>()));

@@ -48,7 +48,6 @@ class _LoginPagesState extends State<LoginPages> {
         builder: (context, state) {
           return Stack(
             children: [
-              if (state is AuthLoading) CupertinoActivityIndicator(),
               Center(
                 child: Padding(
                   padding: const EdgeInsets.all(20),
@@ -108,13 +107,21 @@ class _LoginPagesState extends State<LoginPages> {
                           child: Padding(
                             padding: EdgeInsets.symmetric(vertical: 14),
                             child: Center(
-                              child: Text(
-                                'Login',
-                                style: TextStyle(
-                                  color: Color(0xffE5E7EB),
-                                  fontSize: 14,
-                                ),
-                              ),
+                              child: (state is AuthLoading)
+                                  ? SizedBox(
+                                      width: 20,
+                                      height: 20,
+                                      child: CircularProgressIndicator(
+                                        strokeWidth: 2,
+                                      ),
+                                    )
+                                  : Text(
+                                      'Login',
+                                      style: TextStyle(
+                                        color: Color(0xffE5E7EB),
+                                        fontSize: 14,
+                                      ),
+                                    ),
                             ),
                           ),
                         ),
