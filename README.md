@@ -1,4 +1,4 @@
-# Absensi Pegawai – PT Nikel Arta Gemilang
+# Absensi Pegawai – PT Migas Darma Nusantara
 
 Aplikasi mobile untuk mencatat kehadiran pegawai berbasis lokasi (geofencing) dan **selfie kamera depan**. Fokus pada proses **Check In / Check Out** yang cepat dan akurat.
 
