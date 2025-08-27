@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
+import 'package:shimmer/shimmer.dart';
 import 'package:table_calendar/table_calendar.dart';
 
 import '../../domain/entities/attendance_day_detail.dart';
@@ -52,6 +53,13 @@ class _AttendancePagesState extends State<AttendancePages> {
             builder: (context, state) {
               final detail = state.dayDetail;
 
+              if (state.detailLoading) {
+                return SliverList.builder(
+                  itemCount: 2,
+                  itemBuilder: (context, index) => shimmerWidget(),
+                );
+              }
+
               if (detail == null || detail.events.isEmpty) {
                 return SliverToBoxAdapter(
                   child: Padding(
@@ -90,6 +98,10 @@ class _AttendancePagesState extends State<AttendancePages> {
           // (opsional) Worked seconds ringkas
           BlocBuilder<CalenderBloc, CalenderState>(
             builder: (context, state) {
+              if (state.detailLoading) {
+                return SliverToBoxAdapter();
+              }
+
               final ws = state.dayDetail?.workedSeconds ?? 0;
               if (ws <= 0) return const SliverToBoxAdapter(child: SizedBox());
               final h = ws ~/ 3600;
@@ -257,6 +269,22 @@ class _AttendancePagesState extends State<AttendancePages> {
             style: const TextStyle(color: Color(0xff9CA3AF), fontSize: 14),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget shimmerWidget() {
+    return Shimmer.fromColors(
+      baseColor: const Color(0xFF2B304F),
+      highlightColor: const Color(0xFF3B4270),
+      child: Container(
+        padding: EdgeInsets.all(18),
+        margin: EdgeInsets.fromLTRB(20, 0, 20, 20),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(12),
+          color: Color.fromARGB(142, 52, 60, 96),
+        ),
+        height: 58,
       ),
     );
   }

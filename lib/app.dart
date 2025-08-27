@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import 'features/absensi/data/local/token_storage.dart';
 import 'features/absensi/presentation/pages/login_pages.dart';
@@ -13,9 +14,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-      ),
+      theme: ThemeData(brightness: Brightness.dark),
       home: FutureBuilder(
         future: sl<TokenStorage>().readRefreshToken(),
         builder: (context, snap) {

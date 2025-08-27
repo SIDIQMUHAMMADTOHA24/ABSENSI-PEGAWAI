@@ -84,6 +84,7 @@ class _LoginPagesState extends State<LoginPages> {
                             isVisible
                                 ? CupertinoIcons.eye
                                 : CupertinoIcons.eye_slash,
+                            color: Colors.blueGrey,
                           ),
                         ),
                       ),

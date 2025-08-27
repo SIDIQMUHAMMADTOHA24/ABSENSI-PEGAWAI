@@ -140,29 +140,32 @@ class StatusBloc extends Bloc<StatusEvent, StatusState> {
   }
 
   Future<void> _doCheckIn(RequestCheckIn e, Emitter<StatusState> emit) async {
+    emit(state.copy(loadingCheckIn: true));
     final lat = state.userLat, lng = state.userLng;
     if (lat == null || lng == null) return;
     if (!(state.inside ?? false)) return;
     try {
-      print('skiw');
       await checkIn(lat: lat, long: lng, selfieBase64: e.selfieBase64);
       add(const RefreshServerStatus());
+      emit(state.copy(loadingCheckIn: false));
     } catch (e) {
       print('error = $e');
-      // optional: set error/toast
+      emit(state.copy(loadingCheckIn: false));
     }
   }
 
   Future<void> _doCheckOut(RequestCheckOut e, Emitter<StatusState> emit) async {
+    emit(state.copy(loadingCheckOut: true));
     final lat = state.userLat, long = state.userLng;
     if (lat == null || long == null) return;
     if (!(state.inside ?? false)) return;
     try {
       await checkOut(lat: lat, long: long, selfieBase64: e.selfieBase64);
       add(const RefreshServerStatus());
+      emit(state.copy(loadingCheckOut: false));
     } catch (e) {
       print('error = $e');
-      // optional: set error/toast
+      emit(state.copy(loadingCheckOut: false));
     }
   }
 

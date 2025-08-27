@@ -12,7 +12,7 @@ class DashboardPages extends StatelessWidget {
   Widget build(BuildContext context) {
     return Padding(
       padding: EdgeInsets.symmetric(
-        vertical: MediaQuery.paddingOf(context).top,
+        vertical: MediaQuery.paddingOf(context).top + 20,
       ),
       child: CustomScrollView(
         slivers: [
@@ -210,13 +210,21 @@ class DashboardPages extends StatelessWidget {
                           child: Container(
                             padding: const EdgeInsets.symmetric(vertical: 12),
                             alignment: Alignment.center,
-                            child: const Text(
-                              "Check In",
-                              style: TextStyle(
-                                color: Color(0xffE5E7EB),
-                                fontSize: 16,
-                              ),
-                            ),
+                            child: (state.loadingCheckIn)
+                                ? SizedBox(
+                                    width: 20,
+                                    height: 20,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                    ),
+                                  )
+                                : const Text(
+                                    "Check In",
+                                    style: TextStyle(
+                                      color: Color(0xffE5E7EB),
+                                      fontSize: 16,
+                                    ),
+                                  ),
                           ),
                         ),
                       ),
@@ -246,13 +254,21 @@ class DashboardPages extends StatelessWidget {
                           child: Container(
                             padding: const EdgeInsets.symmetric(vertical: 12),
                             alignment: Alignment.center,
-                            child: const Text(
-                              "Check Out",
-                              style: TextStyle(
-                                color: Color(0xffE5E7EB),
-                                fontSize: 16,
-                              ),
-                            ),
+                            child: (state.loadingCheckOut)
+                                ? SizedBox(
+                                    width: 20,
+                                    height: 20,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                    ),
+                                  )
+                                : const Text(
+                                    "Check Out",
+                                    style: TextStyle(
+                                      color: Color(0xffE5E7EB),
+                                      fontSize: 16,
+                                    ),
+                                  ),
                           ),
                         ),
                       ),
@@ -289,14 +305,14 @@ class DashboardPages extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      "Lat: ${state.userLat ?? '-'}",
+                      "Lat: ${state.userLat?.toStringAsFixed(4) ?? '-'}",
                       style: const TextStyle(
                         color: Color(0xffE5E7EB),
                         fontSize: 18,
                       ),
                     ),
                     Text(
-                      "Long: ${state.userLng ?? '-'}",
+                      "Long: ${state.userLng?.toStringAsFixed(4) ?? '-'}",
                       style: const TextStyle(
                         color: Color(0xffE5E7EB),
                         fontSize: 18,
@@ -359,11 +375,11 @@ class DashboardPages extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      "Lat: ${state.officeLat ?? '-'}",
+                      "Lat: ${state.officeLat?.toStringAsFixed(4) ?? '-'}",
                       style: TextStyle(color: Color(0xffE5E7EB), fontSize: 18),
                     ),
                     Text(
-                      "Long: ${state.officeLng ?? '-'}",
+                      "Long: ${state.officeLng?.toStringAsFixed(4) ?? '-'}",
                       style: TextStyle(color: Color(0xffE5E7EB), fontSize: 18),
                     ),
                   ],
