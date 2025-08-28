@@ -1,4 +1,4 @@
-# Absensi Pegawai – PT Nikel Arta Gemilang
+# Absensi Pegawai – PT Migas Darma Nusantara
 
 Aplikasi mobile untuk mencatat kehadiran pegawai berbasis lokasi (geofencing) dan **selfie kamera depan**. Fokus pada proses **Check In / Check Out** yang cepat dan akurat.
 
@@ -79,9 +79,15 @@ Aplikasi mobile untuk mencatat kehadiran pegawai berbasis lokasi (geofencing) da
 
 ### Login
 
+![WhatsApp Image 2025-08-27 at 18 55 09](https://github.com/user-attachments/assets/a23d1c29-08c8-4b49-84d4-53d76a5a340f)
+
 - Form sederhana, tampil **loading** & **pesan error** ketika gagal.
 
 ### Dashboard / Status
+![WhatsApp Image 2025-08-27 at 18 55 09 (2)](https://github.com/user-attachments/assets/6b6a1d04-db40-4f82-a33d-e6b7788ebbca)
+![WhatsApp Image 2025-08-27 at 18 55 09 (1)](https://github.com/user-attachments/assets/58badaae-083c-4e8a-b828-5c249c24027f)
+![WhatsApp Image 2025-08-27 at 18 55 11](https://github.com/user-attachments/assets/8c9ded09-4803-481d-87f8-dfc0de706f4d)
+![WhatsApp Image 2025-08-27 at 18 55 10](https://github.com/user-attachments/assets/c8c7b395-c902-46fc-86e3-bfb230413bb1)
 
 - **Status**: di dalam/luar area.
 - **Hari ini**: tanggal, **radius kantor (m)**, **jarak ke kantor (m)**.
@@ -89,7 +95,16 @@ Aplikasi mobile untuk mencatat kehadiran pegawai berbasis lokasi (geofencing) da
 - **Aksi**: tombol **Check In / Check Out** aktif sesuai kondisi.
 
 ### Kalender
+![WhatsApp Image 2025-08-27 at 18 55 10 (1)](https://github.com/user-attachments/assets/852c827d-343b-4abc-9b7b-579e5ef38bc7)
 
 - Navigasi bulan (← →).
 - **Marker** di tanggal yang ada absensi.
 - **Panel Riwayat Hari**: daftar waktu Check In /
+
+### Profile
+![WhatsApp Image 2025-08-27 at 18 55 10 (2)](https://github.com/user-attachments/assets/1a2848dd-e4aa-457e-b389-c79df8b1406e)
+
+
+### Demo Aplikasi
+https://youtu.be/3PPrm5DDi0Y
+> Aplikasi ini murni hanya untuk project mandiri, tidak ada kerjasama dengan pihak manamun
