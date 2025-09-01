@@ -1,4 +1,5 @@
 import 'package:absensi_pegawai/features/absensi/presentation/pages/dashboard_pages.dart';
+import 'package:absensi_pegawai/features/absensi/presentation/pages/permission_pages.dart';
 import 'package:absensi_pegawai/features/absensi/presentation/pages/profile_pages.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -21,7 +22,12 @@ class _BottomNavBarWidgetState extends State<BottomNavBarWidget> {
       backgroundColor: Color(0xff10122a),
       body: IndexedStack(
         index: _index,
-        children: [DashboardPages(), AttendancePages(), ProfilePages()],
+        children: [
+          DashboardPages(),
+          PermissionPages(),
+          AttendancePages(),
+          ProfilePages(),
+        ],
       ),
       bottomNavigationBar: Theme(
         data: Theme.of(context).copyWith(splashColor: Colors.transparent),
@@ -35,16 +41,20 @@ class _BottomNavBarWidgetState extends State<BottomNavBarWidget> {
           type: BottomNavigationBarType.fixed,
           items: [
             BottomNavigationBarItem(
-              icon: Icon(CupertinoIcons.home),
+              icon: Icon(CupertinoIcons.house, size: 23),
               label: 'Home',
             ),
             BottomNavigationBarItem(
-              icon: Icon(CupertinoIcons.calendar),
-              label: 'Calender',
+              icon: Icon(CupertinoIcons.doc_person),
+              label: 'Izin',
             ),
             BottomNavigationBarItem(
-              icon: Icon(CupertinoIcons.profile_circled),
-              label: 'Profile',
+              icon: Icon(CupertinoIcons.calendar),
+              label: 'Kalender',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(CupertinoIcons.person_crop_circle),
+              label: 'Profil',
             ),
           ],
         ),
