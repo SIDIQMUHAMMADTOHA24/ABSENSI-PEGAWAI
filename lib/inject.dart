@@ -2,17 +2,20 @@ import 'package:absensi_pegawai/core/access_token_holder.dart';
 import 'package:absensi_pegawai/core/dio_client.dart';
 import 'package:absensi_pegawai/features/absensi/data/datasources/attendance_remote_data_source.dart';
 import 'package:absensi_pegawai/features/absensi/data/datasources/auth_remote_data_source.dart';
+import 'package:absensi_pegawai/features/absensi/data/datasources/cuti_remote_data_source.dart';
 import 'package:absensi_pegawai/features/absensi/data/datasources/location_local_data_source.dart';
 import 'package:absensi_pegawai/features/absensi/data/datasources/user_remote_data_source.dart';
 import 'package:absensi_pegawai/features/absensi/data/local/office_storage.dart';
 import 'package:absensi_pegawai/features/absensi/data/local/token_storage.dart';
 import 'package:absensi_pegawai/features/absensi/data/repositories/attendance_repository_impl.dart';
 import 'package:absensi_pegawai/features/absensi/data/repositories/auth_repository_impl.dart';
+import 'package:absensi_pegawai/features/absensi/data/repositories/cuti_repository_impl.dart';
 import 'package:absensi_pegawai/features/absensi/data/repositories/location_repository_impl.dart';
 import 'package:absensi_pegawai/features/absensi/data/repositories/session_repository_impl.dart';
 import 'package:absensi_pegawai/features/absensi/data/repositories/user_repository_impl.dart';
 import 'package:absensi_pegawai/features/absensi/domain/repositories/attendance_repository.dart';
 import 'package:absensi_pegawai/features/absensi/domain/repositories/auth_repository.dart';
+import 'package:absensi_pegawai/features/absensi/domain/repositories/cuti_repository.dart';
 import 'package:absensi_pegawai/features/absensi/domain/repositories/location_repository.dart';
 import 'package:absensi_pegawai/features/absensi/domain/repositories/office_repository.dart';
 import 'package:absensi_pegawai/features/absensi/domain/repositories/user_repository.dart';
@@ -27,12 +30,14 @@ import 'package:absensi_pegawai/features/absensi/domain/usecases/attendance/get_
 import 'package:absensi_pegawai/features/absensi/domain/usecases/auth/login.dart';
 import 'package:absensi_pegawai/features/absensi/domain/usecases/auth/logout.dart';
 import 'package:absensi_pegawai/features/absensi/domain/usecases/auth/register.dart';
+import 'package:absensi_pegawai/features/absensi/domain/usecases/cuti/quota_cuti.dart';
 import 'package:absensi_pegawai/features/absensi/domain/usecases/session/delete_refresh_token.dart';
 import 'package:absensi_pegawai/features/absensi/domain/usecases/session/read_refresh_token.dart';
 import 'package:absensi_pegawai/features/absensi/domain/usecases/session/save_refresh_token.dart';
 import 'package:absensi_pegawai/features/absensi/domain/usecases/user/get_user.dart';
 import 'package:absensi_pegawai/features/absensi/presentation/bloc/auth/auth_bloc.dart';
 import 'package:absensi_pegawai/features/absensi/presentation/bloc/calender/calender_bloc.dart';
+import 'package:absensi_pegawai/features/absensi/presentation/bloc/cuti/cuti_bloc.dart';
 import 'package:absensi_pegawai/features/absensi/presentation/bloc/status/status_bloc.dart';
 import 'package:absensi_pegawai/features/absensi/presentation/bloc/user/user_bloc.dart';
 import 'package:dio/dio.dart';
@@ -61,6 +66,7 @@ Future<void> injectDI() async {
   sl.registerLazySingleton(() => LocationLocalDataSource());
   sl.registerLazySingleton(() => OfficeRemoteDataSource(sl<Dio>()));
   sl.registerLazySingleton(() => AttendanceRemoteDataSource(sl<Dio>()));
+  sl.registerLazySingleton(() => CutiRemoteDataSource(sl<Dio>()));
 
   //LOCAL
   sl.registerLazySingleton(() => TokenStorage());
@@ -93,6 +99,7 @@ Future<void> injectDI() async {
   sl.registerLazySingleton<AttendanceRepository>(
     () => AttendanceRepositoryImpl(sl()),
   );
+  sl.registerLazySingleton<CutiRepository>(() => CutiRepositoryImpl(sl()));
 
   //USE CASE
   sl.registerLazySingleton(() => Login(sl()));
@@ -111,6 +118,7 @@ Future<void> injectDI() async {
   sl.registerLazySingleton(() => GetAttendanceStatus(sl()));
   sl.registerLazySingleton(() => GetAttendanceMarks(sl()));
   sl.registerLazySingleton(() => GetAttendanceDay(sl()));
+  sl.registerLazySingleton(() => QuotaCuti(sl()));
 
   //BLOC
   sl.registerFactory(
@@ -138,4 +146,6 @@ Future<void> injectDI() async {
   sl.registerFactory(
     () => CalenderBloc(sl<GetAttendanceMarks>(), sl<GetAttendanceDay>()),
   );
+
+  sl.registerFactory(() => CutiBloc(sl<QuotaCuti>()));
 }

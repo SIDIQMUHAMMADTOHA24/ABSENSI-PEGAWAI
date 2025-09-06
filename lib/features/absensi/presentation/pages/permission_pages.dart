@@ -1,8 +1,11 @@
 import 'package:absensi_pegawai/features/absensi/presentation/pages/history_pages.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 import 'package:siqma_field/siqma_field.dart';
+
+import '../bloc/cuti/cuti_bloc.dart';
 
 class PermissionPages extends StatefulWidget {
   const PermissionPages({super.key});
@@ -149,48 +152,53 @@ class _PermissionPagesState extends State<PermissionPages> {
   List<Widget> cutiWidget() {
     return [
       //INFORMASI SAKIT
-      SliverToBoxAdapter(
-        child: Stack(
-          alignment: Alignment.center,
-          children: [
-            Container(
-              width: 150,
-              height: 150,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: Color.fromARGB(136, 52, 60, 96),
-              ),
-            ),
-            SizedBox(
-              width: 240,
-              height: 240,
-              child: Image.asset("assets/calendar.webp"),
-            ),
-            Padding(
-              padding: const EdgeInsets.only(top: 18, right: 5),
-              child: Text(
-                '12',
-                style: TextStyle(
-                  color: Color(0xff343c60),
-                  fontSize: 35,
-                  fontWeight: FontWeight.w600,
+      BlocBuilder<CutiBloc, CutiState>(
+        builder: (context, state) {
+          int? quotaCuti = state.quotaCuti?.remainingDay;
+          return SliverToBoxAdapter(
+            child: Stack(
+              alignment: Alignment.center,
+              children: [
+                Container(
+                  width: 150,
+                  height: 150,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: Color.fromARGB(136, 52, 60, 96),
+                  ),
                 ),
-              ),
-            ),
+                SizedBox(
+                  width: 240,
+                  height: 240,
+                  child: Image.asset("assets/calendar.webp"),
+                ),
+                Padding(
+                  padding: const EdgeInsets.only(top: 18, right: 5),
+                  child: Text(
+                    quotaCuti != null ? quotaCuti.toString() : '0',
+                    style: TextStyle(
+                      color: Color(0xff343c60),
+                      fontSize: 35,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
 
-            Positioned(
-              bottom: 0,
-              child: Text(
-                'Jatah Cuti Tersisa : 12 hari',
-                style: TextStyle(
-                  color: Color(0xffE5E7EB),
-                  fontSize: 18,
-                  fontWeight: FontWeight.w600,
+                Positioned(
+                  bottom: 0,
+                  child: Text(
+                    'Jatah Cuti Tersisa : ${quotaCuti ?? '0'} hari',
+                    style: TextStyle(
+                      color: Color(0xffE5E7EB),
+                      fontSize: 18,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
                 ),
-              ),
+              ],
             ),
-          ],
-        ),
+          );
+        },
       ),
 
       //FORM PENGAJUAN
@@ -264,6 +272,95 @@ class _PermissionPagesState extends State<PermissionPages> {
                 ),
               ),
             ],
+          ),
+        ),
+      ),
+
+      SliverToBoxAdapter(
+        child: Padding(
+          padding: const EdgeInsets.only(left: 20, bottom: 12),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Riwayat Pengajuan Cuti',
+                style: TextStyle(
+                  color: Color(0xffE5E7EB),
+                  fontSize: 18,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              // DropdownButton(
+              //   value: null,
+              //   items: [
+              //     DropdownMenuItem(child: Text('Approved'), value: 'Approved'),
+              //     DropdownMenuItem(child: Text('Rejected'), value: 'Rejected'),
+              //     DropdownMenuItem(child: Text('Pending'), value: 'Pending'),
+              //   ],
+              //   onChanged: (value) {},
+              // ),
+            ],
+          ),
+        ),
+      ),
+
+      SliverList.builder(
+        itemCount: 4,
+        itemBuilder: (context, index) => Container(
+          child: Container(
+            padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            margin: EdgeInsets.only(bottom: 20, left: 20, right: 20),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(12),
+              color: Color.fromARGB(142, 52, 60, 96),
+            ),
+            child: Center(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text('Tanggal Cuti: 15 - 20 Aug 2025'),
+                  Text(
+                    'Liburan keluarga di Bali',
+                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
+                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Diperbarui : 10:00, 26 Jun 2025',
+                            style: TextStyle(
+                              color: Color(0xff9CA3AF),
+                              fontSize: 10,
+                            ),
+                          ),
+                          Text(
+                            'Dibuat : 08:00, 26 Jun 2025',
+                            style: TextStyle(
+                              color: Color(0xff9CA3AF),
+                              fontSize: 10,
+                            ),
+                          ),
+                        ],
+                      ),
+                      Container(
+                        padding: EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 8,
+                        ),
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(8),
+                          color: Colors.green,
+                        ),
+                        child: Text('Approved'),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
           ),
         ),
       ),

@@ -1,4 +1,5 @@
 import 'package:absensi_pegawai/features/absensi/presentation/bloc/calender/calender_bloc.dart';
+import 'package:absensi_pegawai/features/absensi/presentation/bloc/cuti/cuti_bloc.dart';
 import 'package:absensi_pegawai/inject.dart';
 
 import 'package:flutter/material.dart';
@@ -28,6 +29,7 @@ void main(List<String> args) async {
           create: (_) =>
               sl<CalenderBloc>()..add(LoadMonth(monthAnchor: DateTime.now())),
         ),
+        BlocProvider(create: (_) => sl<CutiBloc>()..add(GetQuotaCuti())),
       ],
       child: MyApp(),
     ),
