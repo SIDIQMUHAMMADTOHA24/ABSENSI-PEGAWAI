@@ -1,4 +1,4 @@
-import 'package:absensi_pegawai/features/absensi/data/models/item_model.dart';
+import 'package:absensi_pegawai/features/absensi/data/models/history_cuti_model.dart';
 import 'package:absensi_pegawai/features/absensi/data/models/quota_model.dart';
 import 'package:dio/dio.dart';
 
@@ -13,14 +13,15 @@ class CutiRemoteDataSource {
     return QuotaModel.fromJson(Map.from(res.data as Map));
   }
 
-  Future<List<ItemModel>> getListQuotaCuti() async {
+  Future<List<HistoryCutiModel>> getHistoryCuti() async {
     final res = await dio.get('/leave/cuti/list');
+    print('res = ${res.data}');
     if (res.statusCode != 200) throw Exception('Cannot get List Quota Cuti');
 
     final data = Map<String, dynamic>.from(res.data as Map);
 
     final item = (data['items'] as List)
-        .map((e) => ItemModel.fromJson(Map<String, dynamic>.from(e)))
+        .map((e) => HistoryCutiModel.fromJson(Map<String, dynamic>.from(e)))
         .toList();
 
     return item;

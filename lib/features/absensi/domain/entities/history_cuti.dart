@@ -1,14 +1,16 @@
 // ignore_for_file: public_member_api_docs, sort_constructors_first
 import 'package:equatable/equatable.dart';
 
-class Item extends Equatable {
-  String status;
+enum LeaveStatus { approved, rejected, pending }
+
+class HistoryCuti extends Equatable {
+  LeaveStatus status;
   String reason;
   DateTime startDate;
   DateTime endDate;
   DateTime createdAt;
   DateTime decidedAt;
-  Item({
+  HistoryCuti({
     required this.status,
     required this.reason,
     required this.startDate,

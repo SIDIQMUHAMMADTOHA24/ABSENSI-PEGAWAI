@@ -13,6 +13,7 @@ import 'package:absensi_pegawai/features/absensi/data/repositories/cuti_reposito
 import 'package:absensi_pegawai/features/absensi/data/repositories/location_repository_impl.dart';
 import 'package:absensi_pegawai/features/absensi/data/repositories/session_repository_impl.dart';
 import 'package:absensi_pegawai/features/absensi/data/repositories/user_repository_impl.dart';
+import 'package:absensi_pegawai/features/absensi/domain/entities/history_cuti.dart';
 import 'package:absensi_pegawai/features/absensi/domain/repositories/attendance_repository.dart';
 import 'package:absensi_pegawai/features/absensi/domain/repositories/auth_repository.dart';
 import 'package:absensi_pegawai/features/absensi/domain/repositories/cuti_repository.dart';
@@ -47,6 +48,7 @@ import 'features/absensi/data/datasources/office_remote_data_source.dart';
 import 'features/absensi/data/repositories/office_repository_impl.dart';
 import 'features/absensi/domain/repositories/session_repository.dart';
 import 'features/absensi/domain/usecases/attendance/get_attendance_marks.dart';
+import 'features/absensi/domain/usecases/cuti/list_hisotry_cuti.dart';
 
 final sl = GetIt.I;
 
@@ -119,6 +121,7 @@ Future<void> injectDI() async {
   sl.registerLazySingleton(() => GetAttendanceMarks(sl()));
   sl.registerLazySingleton(() => GetAttendanceDay(sl()));
   sl.registerLazySingleton(() => QuotaCuti(sl()));
+  sl.registerLazySingleton(() => ListHistoryCuti(sl()));
 
   //BLOC
   sl.registerFactory(
@@ -147,5 +150,10 @@ Future<void> injectDI() async {
     () => CalenderBloc(sl<GetAttendanceMarks>(), sl<GetAttendanceDay>()),
   );
 
-  sl.registerFactory(() => CutiBloc(sl<QuotaCuti>()));
+  sl.registerFactory(
+    () => CutiBloc(
+      quotaCuti: sl<QuotaCuti>(),
+      listHistoryItem: sl<ListHistoryCuti>(),
+    ),
+  );
 }

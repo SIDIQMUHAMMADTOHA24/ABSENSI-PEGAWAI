@@ -1,3 +1,4 @@
+import 'package:absensi_pegawai/features/absensi/data/models/history_cuti_model.dart';
 import 'package:absensi_pegawai/features/absensi/presentation/pages/history_pages.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -304,65 +305,92 @@ class _PermissionPagesState extends State<PermissionPages> {
         ),
       ),
 
-      SliverList.builder(
-        itemCount: 4,
-        itemBuilder: (context, index) => Container(
-          child: Container(
-            padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-            margin: EdgeInsets.only(bottom: 20, left: 20, right: 20),
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(12),
-              color: Color.fromARGB(142, 52, 60, 96),
-            ),
-            child: Center(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text('Tanggal Cuti: 15 - 20 Aug 2025'),
-                  Text(
-                    'Liburan keluarga di Bali',
-                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
-                  ),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Diperbarui : 10:00, 26 Jun 2025',
-                            style: TextStyle(
-                              color: Color(0xff9CA3AF),
-                              fontSize: 10,
-                            ),
-                          ),
-                          Text(
-                            'Dibuat : 08:00, 26 Jun 2025',
-                            style: TextStyle(
-                              color: Color(0xff9CA3AF),
-                              fontSize: 10,
-                            ),
-                          ),
-                        ],
+      BlocBuilder<CutiBloc, CutiState>(
+        builder: (context, state) {
+          final data = state.listHistoryCuti;
+          return data != null
+              ? SliverList.builder(
+                  itemCount: data.length,
+                  itemBuilder: (context, index) => Container(
+                    child: Container(
+                      padding: EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 12,
                       ),
-                      Container(
-                        padding: EdgeInsets.symmetric(
-                          horizontal: 12,
-                          vertical: 8,
-                        ),
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(8),
-                          color: Colors.green,
-                        ),
-                        child: Text('Approved'),
+                      margin: EdgeInsets.only(bottom: 20, left: 20, right: 20),
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(12),
+                        color: Color.fromARGB(142, 52, 60, 96),
                       ),
-                    ],
+                      child: Center(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Tanggal Cuti: ${formatDateRange(data[index].startDate, data[index].endDate)}',
+                              style: TextStyle(
+                                color: Color(0xffE5E7EB),
+                                fontSize: 14,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                            Text(
+                              data[index].reason,
+                              style: TextStyle(
+                                fontSize: 20,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      'Diperbarui : ${formatUpdatedAt(data[index].decidedAt)}',
+                                      style: TextStyle(
+                                        color: Color(0xff9CA3AF),
+                                        fontSize: 10,
+                                      ),
+                                    ),
+                                    Text(
+                                      'Dibuat : ${formatUpdatedAt(data[index].createdAt)}',
+                                      style: TextStyle(
+                                        color: Color(0xff9CA3AF),
+                                        fontSize: 10,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                Container(
+                                  padding: EdgeInsets.symmetric(
+                                    horizontal: 12,
+                                    vertical: 8,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(8),
+                                    color: data[index].status.color,
+                                  ),
+                                  child: Text(
+                                    data[index].status.label,
+                                    style: TextStyle(
+                                      color: Color(0xffE5E7EB),
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
                   ),
-                ],
-              ),
-            ),
-          ),
-        ),
+                )
+              : SliverToBoxAdapter();
+        },
       ),
     ];
   }
@@ -506,5 +534,32 @@ class _PermissionPagesState extends State<PermissionPages> {
         );
       },
     );
+  }
+
+  String formatUpdatedAt(DateTime value) {
+    // Parse string ISO8601
+    final dateTime = value.toLocal();
+
+    // Format jam:menit (24 jam)
+    final time = DateFormat.Hm().format(dateTime);
+
+    // Format tanggal dengan nama bulan singkat (id_ID → bahasa Indonesia)
+    final date = DateFormat("d MMM yyyy", "id_ID").format(dateTime);
+
+    return "$time, $date";
+  }
+
+  String formatDateRange(DateTime start, DateTime end) {
+    // Kalau bulan dan tahun sama → tampilkan ringkas
+    if (start.month == end.month && start.year == end.year) {
+      final dayRange = "${start.day} - ${end.day}";
+      final monthYear = DateFormat("MMM yyyy", "en_US").format(start);
+      return "$dayRange $monthYear";
+    }
+
+    // Kalau beda bulan/tahun → tampilkan lengkap
+    final startFmt = DateFormat("d MMM yyyy", "en_US").format(start);
+    final endFmt = DateFormat("d MMM yyyy", "en_US").format(end);
+    return "$startFmt - $endFmt";
   }
 }

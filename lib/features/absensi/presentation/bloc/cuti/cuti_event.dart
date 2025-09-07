@@ -10,3 +10,7 @@ sealed class CutiEvent extends Equatable {
 class GetQuotaCuti extends CutiEvent {
   GetQuotaCuti();
 }
+
+class GetHistoryCuti extends CutiEvent {
+  GetHistoryCuti();
+}

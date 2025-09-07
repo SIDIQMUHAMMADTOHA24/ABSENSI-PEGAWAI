@@ -1,6 +1,7 @@
 import 'package:absensi_pegawai/features/absensi/presentation/bloc/calender/calender_bloc.dart';
 import 'package:absensi_pegawai/features/absensi/presentation/bloc/cuti/cuti_bloc.dart';
 import 'package:absensi_pegawai/inject.dart';
+import 'package:intl/date_symbol_data_local.dart';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -15,6 +16,7 @@ import 'features/absensi/presentation/bloc/user/user_bloc.dart';
 
 void main(List<String> args) async {
   WidgetsFlutterBinding.ensureInitialized();
+  await initializeDateFormatting('en_US', 'id_ID');
 
   await injectDI();
   await _bootstrapAuth();
@@ -29,7 +31,11 @@ void main(List<String> args) async {
           create: (_) =>
               sl<CalenderBloc>()..add(LoadMonth(monthAnchor: DateTime.now())),
         ),
-        BlocProvider(create: (_) => sl<CutiBloc>()..add(GetQuotaCuti())),
+        BlocProvider(
+          create: (_) => sl<CutiBloc>()
+            ..add(GetQuotaCuti())
+            ..add(GetHistoryCuti()),
+        ),
       ],
       child: MyApp(),
     ),
@@ -49,7 +55,6 @@ Future<void> _bootstrapAuth() async {
     holder.set(fresh.accessToken); // isi access token utk request awal
     await storage.saveRefreshToken(fresh.refreshToken); // putar refresh token
   } catch (_) {
-    // kalau gagal refresh di boot, anggap sesi mati
     await storage.deleteRefreshToken();
     holder.clear();
   }
