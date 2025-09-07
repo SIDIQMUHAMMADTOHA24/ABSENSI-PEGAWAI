@@ -4,6 +4,7 @@ import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 
 import '../../../domain/entities/quota.dart';
+import '../../../domain/usecases/cuti/add_cuti.dart';
 import '../../../domain/usecases/cuti/list_hisotry_cuti.dart';
 
 part 'cuti_event.dart';
@@ -12,11 +13,16 @@ part 'cuti_state.dart';
 class CutiBloc extends Bloc<CutiEvent, CutiState> {
   final QuotaCuti quotaCuti;
   final ListHistoryCuti listHistoryItem;
+  final AddCuti addCuti;
 
-  CutiBloc({required this.quotaCuti, required this.listHistoryItem})
-    : super(CutiState()) {
+  CutiBloc({
+    required this.quotaCuti,
+    required this.listHistoryItem,
+    required this.addCuti,
+  }) : super(CutiState()) {
     on<GetQuotaCuti>(getQuotaCuti);
     on<GetHistoryCuti>(getHistoryCuti);
+    on<AddCutiEvent>(addCutiEvent);
   }
 
   Future<void> getQuotaCuti(GetQuotaCuti event, Emitter<CutiState> emit) async {
@@ -36,7 +42,31 @@ class CutiBloc extends Bloc<CutiEvent, CutiState> {
       List<HistoryCuti> result = await listHistoryItem();
       emit(state.copyWith(listHistoryCuti: result));
     } catch (e) {
+      print(e);
       emit(state.copyWith(error: e.toString()));
+    }
+  }
+
+  Future<void> addCutiEvent(AddCutiEvent event, Emitter<CutiState> emit) async {
+    emit(state.copyWith(loadingAddCuti: true));
+    try {
+      bool res = await addCuti(
+        reason: event.reason,
+        startDate: event.startDate,
+        endDate: event.endDate,
+      );
+
+      if (res) {
+        emit(state.copyWith(addSuccess: 'Berhasil meminta cuti'));
+        emit(state.copyWith(loadingAddCuti: false));
+        add(GetHistoryCuti());
+      } else {
+        emit(state.copyWith(addFailed: 'Gagal meminta cuti'));
+        emit(state.copyWith(loadingAddCuti: false));
+      }
+    } catch (e) {
+      emit(state.copyWith(addFailed: 'Gagal meminta cuti'));
+      emit(state.copyWith(loadingAddCuti: false));
     }
   }
 }

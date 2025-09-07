@@ -16,4 +16,17 @@ class CutiRepositoryImpl implements CutiRepository {
   Future<List<HistoryCuti>> getHistoryCuti() {
     return cutiRemoteDataSource.getHistoryCuti();
   }
+
+  @override
+  Future<bool> addCuti({
+    required String reason,
+    required String startDate,
+    required String endDate,
+  }) {
+    return cutiRemoteDataSource.addCuti(
+      reason: reason,
+      startDate: startDate,
+      endDate: endDate,
+    );
+  }
 }

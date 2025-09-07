@@ -14,3 +14,18 @@ class GetQuotaCuti extends CutiEvent {
 class GetHistoryCuti extends CutiEvent {
   GetHistoryCuti();
 }
+
+class AddCutiEvent extends CutiEvent {
+  final String reason;
+  final String startDate;
+  final String endDate;
+
+  AddCutiEvent({
+    required this.reason,
+    required this.startDate,
+    required this.endDate,
+  });
+
+  @override
+  List<Object> get props => [reason, startDate, endDate];
+}

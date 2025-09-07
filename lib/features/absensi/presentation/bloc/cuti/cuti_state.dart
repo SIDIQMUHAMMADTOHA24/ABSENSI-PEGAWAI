@@ -5,20 +5,43 @@ class CutiState extends Equatable {
   final Quota? quotaCuti;
   final String? error;
   final List<HistoryCuti>? listHistoryCuti;
-  const CutiState({this.quotaCuti, this.error, this.listHistoryCuti});
+  final bool? loadingAddCuti;
+  final String? addSuccess;
+  final String? addFailed;
+  const CutiState({
+    this.quotaCuti,
+    this.error,
+    this.listHistoryCuti,
+    this.addSuccess,
+    this.addFailed,
+    this.loadingAddCuti,
+  });
 
   CutiState copyWith({
     Quota? quotaCuti,
     String? error,
+    String? addSuccess,
+    String? addFailed,
     List<HistoryCuti>? listHistoryCuti,
+    bool? loadingAddCuti,
   }) {
     return CutiState(
       quotaCuti: quotaCuti ?? this.quotaCuti,
       error: error ?? this.error,
       listHistoryCuti: listHistoryCuti ?? this.listHistoryCuti,
+      addSuccess: addSuccess ?? this.addSuccess,
+      addFailed: addFailed ?? this.addFailed,
+      loadingAddCuti: loadingAddCuti ?? this.loadingAddCuti,
     );
   }
 
   @override
-  List<Object?> get props => [quotaCuti, error, listHistoryCuti];
+  List<Object?> get props => [
+    quotaCuti,
+    error,
+    listHistoryCuti,
+    addSuccess,
+    addFailed,
+    loadingAddCuti,
+  ];
 }

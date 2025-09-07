@@ -31,6 +31,7 @@ import 'package:absensi_pegawai/features/absensi/domain/usecases/attendance/get_
 import 'package:absensi_pegawai/features/absensi/domain/usecases/auth/login.dart';
 import 'package:absensi_pegawai/features/absensi/domain/usecases/auth/logout.dart';
 import 'package:absensi_pegawai/features/absensi/domain/usecases/auth/register.dart';
+import 'package:absensi_pegawai/features/absensi/domain/usecases/cuti/add_cuti.dart';
 import 'package:absensi_pegawai/features/absensi/domain/usecases/cuti/quota_cuti.dart';
 import 'package:absensi_pegawai/features/absensi/domain/usecases/session/delete_refresh_token.dart';
 import 'package:absensi_pegawai/features/absensi/domain/usecases/session/read_refresh_token.dart';
@@ -122,6 +123,7 @@ Future<void> injectDI() async {
   sl.registerLazySingleton(() => GetAttendanceDay(sl()));
   sl.registerLazySingleton(() => QuotaCuti(sl()));
   sl.registerLazySingleton(() => ListHistoryCuti(sl()));
+  sl.registerLazySingleton(() => AddCuti(sl()));
 
   //BLOC
   sl.registerFactory(
@@ -154,6 +156,7 @@ Future<void> injectDI() async {
     () => CutiBloc(
       quotaCuti: sl<QuotaCuti>(),
       listHistoryItem: sl<ListHistoryCuti>(),
+      addCuti: sl<AddCuti>(),
     ),
   );
 }

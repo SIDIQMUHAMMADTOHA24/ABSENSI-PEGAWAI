@@ -9,7 +9,7 @@ class HistoryCuti extends Equatable {
   DateTime startDate;
   DateTime endDate;
   DateTime createdAt;
-  DateTime decidedAt;
+  DateTime? decidedAt;
   HistoryCuti({
     required this.status,
     required this.reason,

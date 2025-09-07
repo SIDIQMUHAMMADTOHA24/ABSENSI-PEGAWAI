@@ -15,15 +15,31 @@ class CutiRemoteDataSource {
 
   Future<List<HistoryCutiModel>> getHistoryCuti() async {
     final res = await dio.get('/leave/cuti/list');
-    print('res = ${res.data}');
-    if (res.statusCode != 200) throw Exception('Cannot get List Quota Cuti');
+    try {
+      if (res.statusCode != 200) throw Exception('Cannot get List Quota Cuti');
 
-    final data = Map<String, dynamic>.from(res.data as Map);
+      final data = Map<String, dynamic>.from(res.data as Map);
 
-    final item = (data['items'] as List)
-        .map((e) => HistoryCutiModel.fromJson(Map<String, dynamic>.from(e)))
-        .toList();
+      final item = (data['items'] as List)
+          .map((e) => HistoryCutiModel.fromJson(Map<String, dynamic>.from(e)))
+          .toList();
 
-    return item;
+      return item;
+    } catch (e) {
+      throw Exception(e);
+    }
+  }
+
+  Future<bool> addCuti({
+    required String reason,
+    required String startDate,
+    required String endDate,
+  }) async {
+    final res = await dio.post(
+      '/leave/cuti/request',
+      data: {"reason": reason, "start_date": startDate, "end_date": endDate},
+    );
+    if (res.statusCode != 201) return false;
+    return true;
   }
 }

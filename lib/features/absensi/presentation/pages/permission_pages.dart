@@ -291,15 +291,6 @@ class _PermissionPagesState extends State<PermissionPages> {
                   fontWeight: FontWeight.w600,
                 ),
               ),
-              // DropdownButton(
-              //   value: null,
-              //   items: [
-              //     DropdownMenuItem(child: Text('Approved'), value: 'Approved'),
-              //     DropdownMenuItem(child: Text('Rejected'), value: 'Rejected'),
-              //     DropdownMenuItem(child: Text('Pending'), value: 'Pending'),
-              //   ],
-              //   onChanged: (value) {},
-              // ),
             ],
           ),
         ),
@@ -536,17 +527,20 @@ class _PermissionPagesState extends State<PermissionPages> {
     );
   }
 
-  String formatUpdatedAt(DateTime value) {
-    // Parse string ISO8601
-    final dateTime = value.toLocal();
+  String formatUpdatedAt(DateTime? value) {
+    if (value != null) {
+      // Parse string ISO8601
+      final dateTime = value.toLocal();
 
-    // Format jam:menit (24 jam)
-    final time = DateFormat.Hm().format(dateTime);
+      // Format jam:menit (24 jam)
+      final time = DateFormat.Hm().format(dateTime);
 
-    // Format tanggal dengan nama bulan singkat (id_ID → bahasa Indonesia)
-    final date = DateFormat("d MMM yyyy", "id_ID").format(dateTime);
+      // Format tanggal dengan nama bulan singkat (id_ID → bahasa Indonesia)
+      final date = DateFormat("d MMM yyyy", "id_ID").format(dateTime);
 
-    return "$time, $date";
+      return "$time, $date";
+    }
+    return '-';
   }
 
   String formatDateRange(DateTime start, DateTime end) {

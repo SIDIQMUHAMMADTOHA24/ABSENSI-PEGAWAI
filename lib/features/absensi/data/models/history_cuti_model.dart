@@ -18,7 +18,9 @@ class HistoryCutiModel extends HistoryCuti {
         startDate: DateTime.parse(json["start_date"]),
         endDate: DateTime.parse(json["end_date"]),
         createdAt: DateTime.parse(json["created_at"]),
-        decidedAt: DateTime.parse(json["decided_at"]),
+        decidedAt: json['decided_at'] != null
+            ? DateTime.parse(json["decided_at"])
+            : null,
       );
 }
 
@@ -37,11 +39,11 @@ extension LeaveStatusX on LeaveStatus {
   String get label {
     switch (this) {
       case LeaveStatus.approved:
-        return "Approved";
+        return "approved";
       case LeaveStatus.rejected:
-        return "Rejected";
+        return "rejected";
       case LeaveStatus.pending:
-        return "Pending";
+        return "pending";
     }
   }
 
@@ -53,7 +55,7 @@ extension LeaveStatusX on LeaveStatus {
       case LeaveStatus.rejected:
         return Colors.red; // merah
       case LeaveStatus.pending:
-        return Colors.amber; // kuning
+        return Colors.orange; // kuning
     }
   }
 
