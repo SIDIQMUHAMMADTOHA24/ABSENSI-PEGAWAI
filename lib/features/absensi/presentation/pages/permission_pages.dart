@@ -255,19 +255,52 @@ class _PermissionPagesState extends State<PermissionPages> {
                 color: Color(0xff343c60),
                 borderRadius: BorderRadius.circular(12),
                 child: InkWell(
-                  onTap: () {},
+                  onTap: () {
+                    if (keperluanController.text.isNotEmpty &&
+                        startDateController.text.isNotEmpty &&
+                        endDateController.text.isNotEmpty) {
+                      final inputFormat = DateFormat('dd/MM/yyyy');
+                      DateTime startDate = inputFormat.parse(
+                        startDateController.text,
+                      );
+
+                      DateTime endDate = inputFormat.parse(
+                        endDateController.text,
+                      );
+
+                      context.read<CutiBloc>().add(
+                        AddCutiEvent(
+                          reason: keperluanController.text.trim(),
+                          startDate: DateFormat('yyyy-MM-dd').format(startDate),
+                          endDate: DateFormat('yyyy-MM-dd').format(endDate),
+                        ),
+                      );
+                    }
+                  },
                   borderRadius: BorderRadius.circular(12),
                   focusColor: Color(0xff343c60),
                   child: Padding(
                     padding: EdgeInsets.symmetric(vertical: 14),
-                    child: Center(
-                      child: Text(
-                        'Ajukan Cuti',
-                        style: TextStyle(
-                          color: Color(0xffE5E7EB),
-                          fontSize: 14,
-                        ),
-                      ),
+                    child: BlocBuilder<CutiBloc, CutiState>(
+                      builder: (context, state) {
+                        return Center(
+                          child: (state.loadingAddCuti)
+                              ? SizedBox(
+                                  width: 20,
+                                  height: 20,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                  ),
+                                )
+                              : Text(
+                                  'Ajukan Cuti',
+                                  style: TextStyle(
+                                    color: Color(0xffE5E7EB),
+                                    fontSize: 14,
+                                  ),
+                                ),
+                        );
+                      },
                     ),
                   ),
                 ),
@@ -484,6 +517,7 @@ class _PermissionPagesState extends State<PermissionPages> {
     ];
   }
 
+  //POP UP
   showCupertinoModalPopUp(TextEditingController controller) {
     final formatter = DateFormat('dd/MM/yyyy');
     DateTime? initialDate;
@@ -527,6 +561,7 @@ class _PermissionPagesState extends State<PermissionPages> {
     );
   }
 
+  //FORMAT DATE
   String formatUpdatedAt(DateTime? value) {
     if (value != null) {
       // Parse string ISO8601

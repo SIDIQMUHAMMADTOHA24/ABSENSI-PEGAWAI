@@ -24,6 +24,8 @@ class CutiRemoteDataSource {
           .map((e) => HistoryCutiModel.fromJson(Map<String, dynamic>.from(e)))
           .toList();
 
+      item.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+
       return item;
     } catch (e) {
       throw Exception(e);

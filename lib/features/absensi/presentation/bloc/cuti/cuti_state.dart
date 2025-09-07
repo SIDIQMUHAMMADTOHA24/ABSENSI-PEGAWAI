@@ -5,7 +5,7 @@ class CutiState extends Equatable {
   final Quota? quotaCuti;
   final String? error;
   final List<HistoryCuti>? listHistoryCuti;
-  final bool? loadingAddCuti;
+  final bool loadingAddCuti;
   final String? addSuccess;
   final String? addFailed;
   const CutiState({
@@ -14,7 +14,7 @@ class CutiState extends Equatable {
     this.listHistoryCuti,
     this.addSuccess,
     this.addFailed,
-    this.loadingAddCuti,
+    this.loadingAddCuti = false,
   });
 
   CutiState copyWith({
@@ -23,7 +23,7 @@ class CutiState extends Equatable {
     String? addSuccess,
     String? addFailed,
     List<HistoryCuti>? listHistoryCuti,
-    bool? loadingAddCuti,
+    bool? loadingAddCuti = false,
   }) {
     return CutiState(
       quotaCuti: quotaCuti ?? this.quotaCuti,
