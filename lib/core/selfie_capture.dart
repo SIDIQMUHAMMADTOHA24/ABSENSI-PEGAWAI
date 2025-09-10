@@ -1,15 +1,20 @@
 import 'dart:convert';
 import 'dart:typed_data';
+import 'package:absensi_pegawai/features/absensi/presentation/bloc/sakit/sakit_bloc.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:path/path.dart' as p;
 
-Future<String?> captureSelfieBase64(BuildContext context) async {
+Future<String?> capturePhotoBase64(
+  BuildContext context,
+  bool isSuratDokter,
+) async {
   final picker = ImagePicker();
 
   while (true) {
     final file = await picker.pickImage(
       source: ImageSource.camera,
-      preferredCameraDevice: CameraDevice.front,
       maxWidth: 1080,
       maxHeight: 1080,
       imageQuality: 85, // kompres sedikit
@@ -19,6 +24,14 @@ Future<String?> captureSelfieBase64(BuildContext context) async {
     final bytes = await file.readAsBytes();
     final ok = await _showPreview(context, bytes);
     if (ok == true) {
+      if (isSuratDokter) {
+        context.read<SakitBloc>().add(
+          SetPathAndBase64(
+            path: p.basename(file.path),
+            base64: base64Encode(bytes),
+          ),
+        );
+      }
       return base64Encode(bytes);
     }
     // kalau Retake -> loop lagi
@@ -38,7 +51,7 @@ Future<bool?> _showPreview(BuildContext context, Uint8List bytes) {
           children: [
             const SizedBox(height: 12),
             const Text(
-              'Preview Selfie',
+              'Preview Photo',
               style: TextStyle(
                 color: Color(0xffE5E7EB),
                 fontSize: 18,

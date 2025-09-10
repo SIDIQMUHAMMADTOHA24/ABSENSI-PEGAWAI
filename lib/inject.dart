@@ -4,6 +4,7 @@ import 'package:absensi_pegawai/features/absensi/data/datasources/attendance_rem
 import 'package:absensi_pegawai/features/absensi/data/datasources/auth_remote_data_source.dart';
 import 'package:absensi_pegawai/features/absensi/data/datasources/cuti_remote_data_source.dart';
 import 'package:absensi_pegawai/features/absensi/data/datasources/location_local_data_source.dart';
+import 'package:absensi_pegawai/features/absensi/data/datasources/sakit_remote_data_source.dart';
 import 'package:absensi_pegawai/features/absensi/data/datasources/user_remote_data_source.dart';
 import 'package:absensi_pegawai/features/absensi/data/local/office_storage.dart';
 import 'package:absensi_pegawai/features/absensi/data/local/token_storage.dart';
@@ -33,6 +34,7 @@ import 'package:absensi_pegawai/features/absensi/domain/usecases/auth/logout.dar
 import 'package:absensi_pegawai/features/absensi/domain/usecases/auth/register.dart';
 import 'package:absensi_pegawai/features/absensi/domain/usecases/cuti/add_cuti.dart';
 import 'package:absensi_pegawai/features/absensi/domain/usecases/cuti/quota_cuti.dart';
+import 'package:absensi_pegawai/features/absensi/domain/usecases/sakit/add_sakit.dart';
 import 'package:absensi_pegawai/features/absensi/domain/usecases/session/delete_refresh_token.dart';
 import 'package:absensi_pegawai/features/absensi/domain/usecases/session/read_refresh_token.dart';
 import 'package:absensi_pegawai/features/absensi/domain/usecases/session/save_refresh_token.dart';
@@ -40,6 +42,7 @@ import 'package:absensi_pegawai/features/absensi/domain/usecases/user/get_user.d
 import 'package:absensi_pegawai/features/absensi/presentation/bloc/auth/auth_bloc.dart';
 import 'package:absensi_pegawai/features/absensi/presentation/bloc/calender/calender_bloc.dart';
 import 'package:absensi_pegawai/features/absensi/presentation/bloc/cuti/cuti_bloc.dart';
+import 'package:absensi_pegawai/features/absensi/presentation/bloc/sakit/sakit_bloc.dart';
 import 'package:absensi_pegawai/features/absensi/presentation/bloc/status/status_bloc.dart';
 import 'package:absensi_pegawai/features/absensi/presentation/bloc/user/user_bloc.dart';
 import 'package:dio/dio.dart';
@@ -47,9 +50,12 @@ import 'package:get_it/get_it.dart';
 
 import 'features/absensi/data/datasources/office_remote_data_source.dart';
 import 'features/absensi/data/repositories/office_repository_impl.dart';
+import 'features/absensi/data/repositories/sakit_repository_impl.dart';
+import 'features/absensi/domain/repositories/sakit_repository.dart';
 import 'features/absensi/domain/repositories/session_repository.dart';
 import 'features/absensi/domain/usecases/attendance/get_attendance_marks.dart';
 import 'features/absensi/domain/usecases/cuti/list_hisotry_cuti.dart';
+import 'features/absensi/domain/usecases/sakit/list_history_sakit.dart';
 
 final sl = GetIt.I;
 
@@ -70,6 +76,7 @@ Future<void> injectDI() async {
   sl.registerLazySingleton(() => OfficeRemoteDataSource(sl<Dio>()));
   sl.registerLazySingleton(() => AttendanceRemoteDataSource(sl<Dio>()));
   sl.registerLazySingleton(() => CutiRemoteDataSource(sl<Dio>()));
+  sl.registerLazySingleton(() => SakitRemoteDataSource(sl<Dio>()));
 
   //LOCAL
   sl.registerLazySingleton(() => TokenStorage());
@@ -103,6 +110,7 @@ Future<void> injectDI() async {
     () => AttendanceRepositoryImpl(sl()),
   );
   sl.registerLazySingleton<CutiRepository>(() => CutiRepositoryImpl(sl()));
+  sl.registerLazySingleton<SakitRepository>(() => SakitRepositoryImpl(sl()));
 
   //USE CASE
   sl.registerLazySingleton(() => Login(sl()));
@@ -124,6 +132,8 @@ Future<void> injectDI() async {
   sl.registerLazySingleton(() => QuotaCuti(sl()));
   sl.registerLazySingleton(() => ListHistoryCuti(sl()));
   sl.registerLazySingleton(() => AddCuti(sl()));
+  sl.registerLazySingleton(() => ListHistorySakit(sl()));
+  sl.registerLazySingleton(() => AddSakit(sl()));
 
   //BLOC
   sl.registerFactory(
@@ -157,6 +167,12 @@ Future<void> injectDI() async {
       quotaCuti: sl<QuotaCuti>(),
       listHistoryItem: sl<ListHistoryCuti>(),
       addCuti: sl<AddCuti>(),
+    ),
+  );
+  sl.registerFactory(
+    () => SakitBloc(
+      listHistorySakit: sl<ListHistorySakit>(),
+      addSakit: sl<AddSakit>(),
     ),
   );
 }

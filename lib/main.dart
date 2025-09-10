@@ -1,5 +1,6 @@
 import 'package:absensi_pegawai/features/absensi/presentation/bloc/calender/calender_bloc.dart';
 import 'package:absensi_pegawai/features/absensi/presentation/bloc/cuti/cuti_bloc.dart';
+import 'package:absensi_pegawai/features/absensi/presentation/bloc/sakit/sakit_bloc.dart';
 import 'package:absensi_pegawai/inject.dart';
 import 'package:intl/date_symbol_data_local.dart';
 
@@ -36,6 +37,7 @@ void main(List<String> args) async {
             ..add(GetQuotaCuti())
             ..add(GetHistoryCuti()),
         ),
+        BlocProvider(create: (_) => sl<SakitBloc>()..add(GetHistorySakit())),
       ],
       child: MyApp(),
     ),

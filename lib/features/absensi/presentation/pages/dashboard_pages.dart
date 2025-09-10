@@ -194,8 +194,9 @@ class DashboardPages extends StatelessWidget {
                         child: InkWell(
                           onTap: canCheckIn
                               ? () async {
-                                  final b64 = await captureSelfieBase64(
+                                  final b64 = await capturePhotoBase64(
                                     context,
+                                    false,
                                   );
                                   if (b64 == null) return;
                                   context.read<StatusBloc>().add(
@@ -239,8 +240,9 @@ class DashboardPages extends StatelessWidget {
                         child: InkWell(
                           onTap: canCheckOut
                               ? () async {
-                                  final b64 = await captureSelfieBase64(
+                                  final b64 = await capturePhotoBase64(
                                     context,
+                                    false,
                                   );
                                   context.read<StatusBloc>().add(
                                     RequestCheckOut(b64!),

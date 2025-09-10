@@ -1,12 +1,17 @@
+import 'dart:convert';
+import 'dart:typed_data';
+
 import 'package:absensi_pegawai/features/absensi/data/models/history_cuti_model.dart';
-import 'package:absensi_pegawai/features/absensi/presentation/pages/history_pages.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import 'package:siqma_field/siqma_field.dart';
 
+import '../../../../core/selfie_capture.dart';
 import '../bloc/cuti/cuti_bloc.dart';
+import '../bloc/sakit/sakit_bloc.dart';
 
 class PermissionPages extends StatefulWidget {
   const PermissionPages({super.key});
@@ -17,10 +22,13 @@ class PermissionPages extends StatefulWidget {
 
 class _PermissionPagesState extends State<PermissionPages> {
   final keperluanController = TextEditingController();
-  final startDateController = TextEditingController();
-  final endDateController = TextEditingController();
-  final sickDateController = TextEditingController();
+  final startCutiController = TextEditingController();
+  final endCutiController = TextEditingController();
+  final startSakitController = TextEditingController();
+  final endSakitController = TextEditingController();
   final keteranganController = TextEditingController();
+
+  String? patch;
 
   bool isCuti = false;
 
@@ -33,11 +41,17 @@ class _PermissionPagesState extends State<PermissionPages> {
   @override
   void dispose() {
     keperluanController.dispose();
-    startDateController.dispose();
-    endDateController.dispose();
-    sickDateController.dispose();
+    startCutiController.dispose();
+    endCutiController.dispose();
+    startSakitController.dispose();
     keteranganController.dispose();
+    endSakitController.dispose();
     super.dispose();
+  }
+
+  String ellipseMiddle(String s, {int head = 4, int tail = 4}) {
+    if (s.length <= head + tail + 3) return s;
+    return '${s.substring(0, head)}...${s.substring(s.length - tail)}';
   }
 
   @override
@@ -51,32 +65,13 @@ class _PermissionPagesState extends State<PermissionPages> {
               bottom: 12,
             ),
             child: Center(
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.all(20),
-                    child: Icon(CupertinoIcons.time, color: Colors.transparent),
-                  ),
-                  Text(
-                    'Perizinan',
-                    style: TextStyle(
-                      color: Color(0xffE5E7EB),
-                      fontSize: 24,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.all(20),
-                    child: Stack(
-                      alignment: Alignment.topRight,
-                      children: [
-                        Icon(CupertinoIcons.time, color: Color(0xff343c60)),
-                        CircleAvatar(backgroundColor: Colors.red, radius: 4),
-                      ],
-                    ),
-                  ),
-                ],
+              child: Text(
+                'Perizinan',
+                style: TextStyle(
+                  color: Color(0xffE5E7EB),
+                  fontSize: 24,
+                  fontWeight: FontWeight.w500,
+                ),
               ),
             ),
           ),
@@ -149,11 +144,32 @@ class _PermissionPagesState extends State<PermissionPages> {
     return !isCuti ? cutiWidget() : sakitWidget();
   }
 
-  //CUTI
+  //MARK: CUTI
   List<Widget> cutiWidget() {
     return [
       //INFORMASI SAKIT
-      BlocBuilder<CutiBloc, CutiState>(
+      BlocConsumer<CutiBloc, CutiState>(
+        listenWhen: (previous, current) {
+          return previous.addSuccess != current.addSuccess ||
+              previous.addFailed != current.addFailed;
+        },
+        listener: (context, state) {
+          final msg = state.addSuccess ?? state.addFailed;
+          if (msg != null) {
+            ScaffoldMessenger.of(context)
+              ..hideCurrentSnackBar()
+              ..showSnackBar(SnackBar(content: Text(msg)));
+
+            //CLEAR MESSAGE
+            context.read<CutiBloc>().add(
+              ClearMessage(
+                keperluanController: keperluanController,
+                startCutiController: startCutiController,
+                endCutiController: endCutiController,
+              ),
+            );
+          }
+        },
         builder: (context, state) {
           int? quotaCuti = state.quotaCuti?.remainingDay;
           return SliverToBoxAdapter(
@@ -217,14 +233,14 @@ class _PermissionPagesState extends State<PermissionPages> {
               SizedBox(height: 16),
               SiqmaField(
                 label: 'Start',
-                controller: startDateController,
+                controller: startCutiController,
                 hintText: '17/06/2025',
                 hintStyle: TextStyle(color: Color(0xff6B7280)),
                 borderColor: Color.fromARGB(30, 229, 231, 235),
                 fontStyle: TextStyle(color: Color(0xffE5E7EB)),
                 suffixIcon: GestureDetector(
                   onTap: () {
-                    showCupertinoModalPopUp(startDateController);
+                    showCupertinoModalPopUp(startCutiController);
                   },
                   child: Icon(
                     CupertinoIcons.calendar,
@@ -235,14 +251,14 @@ class _PermissionPagesState extends State<PermissionPages> {
               SizedBox(height: 16),
               SiqmaField(
                 label: 'End',
-                controller: endDateController,
+                controller: endCutiController,
                 hintText: '17/08/2025',
                 hintStyle: TextStyle(color: Color(0xff6B7280)),
                 borderColor: Color.fromARGB(30, 229, 231, 235),
                 fontStyle: TextStyle(color: Color(0xffE5E7EB)),
                 suffixIcon: GestureDetector(
                   onTap: () {
-                    showCupertinoModalPopUp(endDateController);
+                    showCupertinoModalPopUp(endCutiController);
                   },
                   child: Icon(
                     CupertinoIcons.calendar,
@@ -251,39 +267,28 @@ class _PermissionPagesState extends State<PermissionPages> {
                 ),
               ),
               SizedBox(height: 16),
-              Material(
-                color: Color(0xff343c60),
-                borderRadius: BorderRadius.circular(12),
-                child: InkWell(
-                  onTap: () {
-                    if (keperluanController.text.isNotEmpty &&
-                        startDateController.text.isNotEmpty &&
-                        endDateController.text.isNotEmpty) {
-                      final inputFormat = DateFormat('dd/MM/yyyy');
-                      DateTime startDate = inputFormat.parse(
-                        startDateController.text,
-                      );
-
-                      DateTime endDate = inputFormat.parse(
-                        endDateController.text,
-                      );
-
-                      context.read<CutiBloc>().add(
-                        AddCutiEvent(
-                          reason: keperluanController.text.trim(),
-                          startDate: DateFormat('yyyy-MM-dd').format(startDate),
-                          endDate: DateFormat('yyyy-MM-dd').format(endDate),
-                        ),
-                      );
-                    }
-                  },
-                  borderRadius: BorderRadius.circular(12),
-                  focusColor: Color(0xff343c60),
-                  child: Padding(
-                    padding: EdgeInsets.symmetric(vertical: 14),
-                    child: BlocBuilder<CutiBloc, CutiState>(
-                      builder: (context, state) {
-                        return Center(
+              BlocBuilder<CutiBloc, CutiState>(
+                builder: (context, state) {
+                  return Material(
+                    color: Color(0xff343c60),
+                    borderRadius: BorderRadius.circular(12),
+                    child: InkWell(
+                      onTap: () {
+                        if (!state.loadingAddCuti) {
+                          context.read<CutiBloc>().add(
+                            AddCutiEvent(
+                              reason: keperluanController.text.trim(),
+                              startDate: startCutiController.text.trim(),
+                              endDate: endCutiController.text.trim(),
+                            ),
+                          );
+                        }
+                      },
+                      borderRadius: BorderRadius.circular(12),
+                      focusColor: Color(0xff343c60),
+                      child: Padding(
+                        padding: EdgeInsets.symmetric(vertical: 14),
+                        child: Center(
                           child: (state.loadingAddCuti)
                               ? SizedBox(
                                   width: 20,
@@ -299,11 +304,11 @@ class _PermissionPagesState extends State<PermissionPages> {
                                     fontSize: 14,
                                   ),
                                 ),
-                        );
-                      },
+                        ),
+                      ),
                     ),
-                  ),
-                ),
+                  );
+                },
               ),
             ],
           ),
@@ -419,7 +424,7 @@ class _PermissionPagesState extends State<PermissionPages> {
     ];
   }
 
-  //SAKIT
+  //MARK: SAKIT
   List<Widget> sakitWidget() {
     return [
       //FORM PENGAJUAN
@@ -429,15 +434,15 @@ class _PermissionPagesState extends State<PermissionPages> {
           child: Column(
             children: [
               SiqmaField(
-                label: 'Tanggal Sakit',
-                controller: sickDateController,
+                label: 'Start Sakit',
+                controller: startSakitController,
                 hintText: '17/08/2025',
                 hintStyle: TextStyle(color: Color(0xff6B7280)),
                 borderColor: Color.fromARGB(30, 229, 231, 235),
                 fontStyle: TextStyle(color: Color(0xffE5E7EB)),
                 suffixIcon: GestureDetector(
                   onTap: () {
-                    showCupertinoModalPopUp(sickDateController);
+                    showCupertinoModalPopUp(startSakitController);
                   },
                   child: Icon(
                     CupertinoIcons.calendar,
@@ -446,78 +451,296 @@ class _PermissionPagesState extends State<PermissionPages> {
                 ),
               ),
               SizedBox(height: 16),
-              Container(
-                padding: EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: Color.fromARGB(30, 229, 231, 235)),
+              SiqmaField(
+                label: 'End Sakit',
+                controller: endSakitController,
+                hintText: '17/08/2025',
+                hintStyle: TextStyle(color: Color(0xff6B7280)),
+                borderColor: Color.fromARGB(30, 229, 231, 235),
+                fontStyle: TextStyle(color: Color(0xffE5E7EB)),
+                suffixIcon: GestureDetector(
+                  onTap: () {
+                    showCupertinoModalPopUp(endSakitController);
+                  },
+                  child: Icon(
+                    CupertinoIcons.calendar,
+                    color: Color.fromARGB(181, 72, 52, 119),
+                  ),
                 ),
-                child: Row(
-                  children: [
-                    Container(
-                      padding: EdgeInsets.all(16),
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(8),
+              ),
+              SizedBox(height: 16),
+              Material(
+                borderRadius: BorderRadius.circular(12),
+                color: Colors.transparent,
+                child: InkWell(
+                  onTap: () async {
+                    await capturePhotoBase64(context, true);
+                  },
+                  borderRadius: BorderRadius.circular(12),
+                  child: Container(
+                    padding: EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(
                         color: Color.fromARGB(30, 229, 231, 235),
                       ),
-                      child: Icon(
-                        CupertinoIcons.tray_arrow_down,
-                        color: Color.fromARGB(106, 229, 231, 235),
-                      ),
                     ),
-                    SizedBox(width: 12),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text('Lampirkan Surat Dokter (Foto)'),
-                        Text(
-                          'JPG, PNG, HEIC',
-                          style: TextStyle(color: Color(0xff6B7280)),
-                        ),
-                      ],
+                    child: BlocBuilder<SakitBloc, SakitState>(
+                      builder: (context, state) {
+                        return Row(
+                          children: [
+                            Container(
+                              padding: EdgeInsets.all(16),
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(8),
+                                color: Color.fromARGB(30, 229, 231, 235),
+                              ),
+                              child: Icon(
+                                CupertinoIcons.tray_arrow_down,
+                                color: Color.fromARGB(106, 229, 231, 235),
+                              ),
+                            ),
+                            SizedBox(width: 12),
+                            state.path != null
+                                ? Expanded(
+                                    child: Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        Text(
+                                          ellipseMiddle(state.path!),
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                        GestureDetector(
+                                          onTap: () {
+                                            context.read<SakitBloc>().add(
+                                              ClearPatchAndBase64(),
+                                            );
+                                          },
+                                          child: Icon(
+                                            CupertinoIcons.clear,
+                                            color: Color.fromARGB(
+                                              181,
+                                              72,
+                                              52,
+                                              119,
+                                            ),
+                                            size: 22,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  )
+                                : Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text('Lampirkan Surat Dokter (Foto)'),
+                                      Text(
+                                        'JPG, PNG, HEIC',
+                                        style: TextStyle(
+                                          color: Color(0xff6B7280),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                          ],
+                        );
+                      },
                     ),
-                  ],
+                  ),
                 ),
               ),
               SizedBox(height: 16),
               SiqmaField(
-                label: 'Keterangan (Opsional)',
-                controller: keperluanController,
+                label: 'Keterangan',
+                controller: keteranganController,
                 maxLines: 4,
                 minLines: 1,
                 borderColor: Color.fromARGB(30, 229, 231, 235),
                 fontStyle: TextStyle(color: Color(0xffE5E7EB)),
+                textInputAction: TextInputAction.done,
               ),
               SizedBox(height: 16),
-              Material(
-                color: Color(0xff343c60),
-                borderRadius: BorderRadius.circular(12),
-                child: InkWell(
-                  onTap: () {},
-                  borderRadius: BorderRadius.circular(12),
-                  focusColor: Color(0xff343c60),
-                  child: Padding(
-                    padding: EdgeInsets.symmetric(vertical: 14),
-                    child: Center(
-                      child: Text(
-                        'Izin Sakit',
-                        style: TextStyle(
-                          color: Color(0xffE5E7EB),
-                          fontSize: 14,
+              BlocConsumer<SakitBloc, SakitState>(
+                listenWhen: (previous, current) {
+                  return previous.addSuccess != current.addSuccess ||
+                      previous.addFailed != current.addFailed;
+                },
+                listener: (context, state) {
+                  final msg = state.addSuccess ?? state.addFailed;
+                  if (msg != null) {
+                    ScaffoldMessenger.of(context)
+                      ..hideCurrentSnackBar()
+                      ..showSnackBar(SnackBar(content: Text(msg)));
+                    context.read<SakitBloc>().add(
+                      ClearCacheSakit(
+                        startSakitController: startSakitController,
+                        endSakitController: endSakitController,
+                        keteranganSakitController: keteranganController,
+                      ),
+                    );
+                  }
+                },
+                builder: (context, state) {
+                  print('base 64 = ${state.base64}');
+                  return Material(
+                    color: Color(0xff343c60),
+                    borderRadius: BorderRadius.circular(12),
+                    child: InkWell(
+                      onTap: () {
+                        if (!state.loadingAddSakit) {
+                          context.read<SakitBloc>().add(
+                            AddSakitEvent(
+                              reason: keteranganController.text.trim(),
+                              startDate: startSakitController.text.trim(),
+                              endDate: endSakitController.text.trim(),
+                            ),
+                          );
+                        }
+                      },
+                      borderRadius: BorderRadius.circular(12),
+                      focusColor: Color(0xff343c60),
+                      child: Padding(
+                        padding: EdgeInsets.symmetric(vertical: 14),
+                        child: Center(
+                          child: (state.loadingAddSakit)
+                              ? SizedBox(
+                                  width: 20,
+                                  height: 20,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                  ),
+                                )
+                              : Text(
+                                  'Izin Sakit',
+                                  style: TextStyle(
+                                    color: Color(0xffE5E7EB),
+                                    fontSize: 14,
+                                  ),
+                                ),
                         ),
                       ),
                     ),
-                  ),
+                  );
+                },
+              ),
+            ],
+          ),
+        ),
+      ),
+
+      SliverToBoxAdapter(
+        child: Padding(
+          padding: const EdgeInsets.only(left: 20, bottom: 12),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Riwayat Pengajuan Sakit',
+                style: TextStyle(
+                  color: Color(0xffE5E7EB),
+                  fontSize: 18,
+                  fontWeight: FontWeight.w600,
                 ),
               ),
             ],
           ),
         ),
       ),
+
+      BlocBuilder<SakitBloc, SakitState>(
+        builder: (context, state) {
+          final data = state.listDataSakit;
+          return data != null
+              ? SliverList.builder(
+                  itemCount: data.length,
+                  itemBuilder: (context, index) => Container(
+                    child: Container(
+                      padding: EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 12,
+                      ),
+                      margin: EdgeInsets.only(bottom: 20, left: 20, right: 20),
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(12),
+                        color: Color.fromARGB(142, 52, 60, 96),
+                      ),
+                      child: Center(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Tanggal Sakit: ${formatDateRange(data[index].startDate, data[index].endDate)}',
+                              style: TextStyle(
+                                color: Color(0xffE5E7EB),
+                                fontSize: 14,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                            Text(
+                              data[index].reason,
+                              style: TextStyle(
+                                fontSize: 20,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      'Diperbarui : ${formatUpdatedAt(data[index].decidedAt)}',
+                                      style: TextStyle(
+                                        color: Color(0xff9CA3AF),
+                                        fontSize: 10,
+                                      ),
+                                    ),
+                                    Text(
+                                      'Dibuat : ${formatUpdatedAt(data[index].createdAt)}',
+                                      style: TextStyle(
+                                        color: Color(0xff9CA3AF),
+                                        fontSize: 10,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                Container(
+                                  padding: EdgeInsets.symmetric(
+                                    horizontal: 12,
+                                    vertical: 8,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(8),
+                                    color: data[index].status.color,
+                                  ),
+                                  child: Text(
+                                    data[index].status.label,
+                                    style: TextStyle(
+                                      color: Color(0xffE5E7EB),
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                )
+              : SliverToBoxAdapter();
+        },
+      ),
     ];
   }
 
-  //POP UP
+  //MARK: POP UP
   showCupertinoModalPopUp(TextEditingController controller) {
     final formatter = DateFormat('dd/MM/yyyy');
     DateTime? initialDate;
@@ -561,7 +784,7 @@ class _PermissionPagesState extends State<PermissionPages> {
     );
   }
 
-  //FORMAT DATE
+  //MARK: FORMAT DATE
   String formatUpdatedAt(DateTime? value) {
     if (value != null) {
       // Parse string ISO8601

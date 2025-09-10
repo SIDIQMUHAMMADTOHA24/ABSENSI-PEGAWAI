@@ -29,3 +29,15 @@ class AddCutiEvent extends CutiEvent {
   @override
   List<Object> get props => [reason, startDate, endDate];
 }
+
+class ClearMessage extends CutiEvent {
+  final TextEditingController keperluanController;
+  final TextEditingController startCutiController;
+  final TextEditingController endCutiController;
+
+  ClearMessage({
+    required this.keperluanController,
+    required this.startCutiController,
+    required this.endCutiController,
+  });
+}

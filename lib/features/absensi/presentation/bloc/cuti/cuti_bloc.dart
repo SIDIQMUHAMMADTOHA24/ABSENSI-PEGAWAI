@@ -2,6 +2,8 @@ import 'package:absensi_pegawai/features/absensi/domain/entities/history_cuti.da
 import 'package:absensi_pegawai/features/absensi/domain/usecases/cuti/quota_cuti.dart';
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
+import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
 import '../../../domain/entities/quota.dart';
 import '../../../domain/usecases/cuti/add_cuti.dart';
@@ -23,6 +25,7 @@ class CutiBloc extends Bloc<CutiEvent, CutiState> {
     on<GetQuotaCuti>(getQuotaCuti);
     on<GetHistoryCuti>(getHistoryCuti);
     on<AddCutiEvent>(addCutiEvent);
+    on<ClearMessage>(clearMessage);
   }
 
   Future<void> getQuotaCuti(GetQuotaCuti event, Emitter<CutiState> emit) async {
@@ -48,25 +51,53 @@ class CutiBloc extends Bloc<CutiEvent, CutiState> {
   }
 
   Future<void> addCutiEvent(AddCutiEvent event, Emitter<CutiState> emit) async {
-    emit(state.copyWith(loadingAddCuti: true));
-    try {
-      bool res = await addCuti(
-        reason: event.reason,
-        startDate: event.startDate,
-        endDate: event.endDate,
-      );
+    if (event.startDate.isNotEmpty &&
+        event.endDate.isNotEmpty &&
+        event.reason.isNotEmpty) {
+      final inputFormat = DateFormat('dd/MM/yyyy');
+      DateTime startDate = inputFormat.parse(event.startDate);
 
-      if (res) {
-        emit(state.copyWith(addSuccess: 'Berhasil meminta cuti'));
-        emit(state.copyWith(loadingAddCuti: false));
-        add(GetHistoryCuti());
-      } else {
-        emit(state.copyWith(addFailed: 'Gagal meminta cuti'));
-        emit(state.copyWith(loadingAddCuti: false));
+      DateTime endDate = inputFormat.parse(event.endDate);
+
+      emit(state.copyWith(loadingAddCuti: true));
+      try {
+        bool res = await addCuti(
+          reason: event.reason,
+          startDate: DateFormat('yyyy-MM-dd').format(startDate),
+          endDate: DateFormat('yyyy-MM-dd').format(endDate),
+        );
+
+        if (res) {
+          emit(
+            state.copyWith(
+              addSuccess: 'Berhasil meminta cuti',
+              loadingAddCuti: false,
+            ),
+          );
+          add(GetHistoryCuti());
+        } else {
+          emit(
+            state.copyWith(
+              addFailed: 'Gagal meminta cuti',
+              loadingAddCuti: false,
+            ),
+          );
+        }
+      } catch (e) {
+        emit(
+          state.copyWith(
+            addFailed: 'Gagal meminta cuti',
+            loadingAddCuti: false,
+          ),
+        );
       }
-    } catch (e) {
-      emit(state.copyWith(addFailed: 'Gagal meminta cuti'));
-      emit(state.copyWith(loadingAddCuti: false));
     }
+  }
+
+  Future<void> clearMessage(ClearMessage event, Emitter<CutiState> emit) async {
+    event.keperluanController.clear();
+    event.startCutiController.clear();
+    event.endCutiController.clear();
+    emit(state.copyWith(addFailed: null, addSuccess: null));
   }
 }
