@@ -1,4 +1,4 @@
-# Absensi Pegawai – PT Migas Darma Nusantara
+<img width="1080" height="2340" alt="Screenshot_1757394760" src="https://github.com/user-attachments/assets/2a8eb2c0-59ff-47b7-9d89-d4b5ec1e62c5" /># Absensi Pegawai – PT Migas Darma Nusantara
 
 Aplikasi mobile untuk mencatat kehadiran pegawai berbasis lokasi (geofencing) dan **selfie kamera depan**. Fokus pada proses **Check In / Check Out** yang cepat dan akurat.
 
@@ -93,6 +93,12 @@ Aplikasi mobile untuk mencatat kehadiran pegawai berbasis lokasi (geofencing) da
 - **Hari ini**: tanggal, **radius kantor (m)**, **jarak ke kantor (m)**.
 - **Waktu**: Check In & Check Out (jika ada).
 - **Aksi**: tombol **Check In / Check Out** aktif sesuai kondisi.
+
+### Permission
+- **Cuti** user bisa mengajukan cuti, nantinya bakal ada atasan yang approve, history juga akan ditampilkan di bawah form pengajuan
+- **Sakit** user bisa mengajukan sakit disertai dengan bukti Surat Keterangan dari dokter, nantinya bakal ada atasan yang approve, history juga akan ditampilkan di bawah form pengajuan
+![Uploading Screenshot_1757394760.png…]()
+![Uploading Screenshot_1757394765.png…]()
 
 ### Kalender
 ![WhatsApp Image 2025-08-27 at 18 55 10 (1)](https://github.com/user-attachments/assets/852c827d-343b-4abc-9b7b-579e5ef38bc7)
