@@ -115,3 +115,6 @@ Aplikasi mobile untuk mencatat kehadiran pegawai berbasis lokasi (geofencing) da
 ### Demo Aplikasi
 https://youtu.be/3PPrm5DDi0Y
 > Aplikasi ini murni hanya untuk project mandiri, tidak ada kerjasama dengan pihak manamun
+
+### Aplikasi
+https://github.com/SIDIQMUHAMMADTOHA24/ABSENSI-PEGAWAI/releases/download/1.0.0/absensi.apk
